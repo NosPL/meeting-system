@@ -12,15 +12,13 @@ public class MeetingGroupsConfiguration {
             MeetingGroupRepository meetingGroupRepository,
             GroupMembershipRepository groupMembershipRepository,
             ActiveUserSubscriptions activeUserSubscriptions,
-            AdministratorsRepository administratorsRepository,
+            AdministratorRepository administratorRepository,
             EventPublisher eventPublisher) {
-        MeetingGroupsFacadeImpl meetingGroups = new MeetingGroupsFacadeImpl(
-                proposalRepository,
-                meetingGroupRepository,
-                groupMembershipRepository,
-                activeUserSubscriptions,
-                administratorsRepository,
-                eventPublisher);
+        var proposalSubmitter = new ProposalSubmitter(proposalRepository, meetingGroupRepository, activeUserSubscriptions);
+        var proposalAccepter = new ProposalAccepter(proposalRepository, meetingGroupRepository, administratorRepository, eventPublisher);
+        var proposalRejecter = new ProposalRejecter(proposalRepository, administratorRepository);
+        var groupJoiner = new GroupJoiner(activeUserSubscriptions, groupMembershipRepository, meetingGroupRepository);
+        var meetingGroups = new MeetingGroupsFacadeImpl(activeUserSubscriptions, administratorRepository, proposalSubmitter, proposalAccepter, proposalRejecter, groupJoiner);
         return new LogsDecorator(meetingGroups);
     }
 
@@ -30,7 +28,7 @@ public class MeetingGroupsConfiguration {
                 new MeetingGroupRepository.InMemory(new LinkedList<>(), MeetingGroup::getId),
                 new GroupMembershipRepository.InMemory(new LinkedList<>(), GroupMembership::getMemberId),
                 new ActiveUserSubscriptions(new LinkedHashSet<>()),
-                new AdministratorsRepository.InMemory(new LinkedList<>(), Administrator::getId),
+                new AdministratorRepository.InMemory(new LinkedList<>(), Administrator::getId),
                 eventPublisher);
     }
 }
