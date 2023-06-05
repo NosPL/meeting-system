@@ -15,7 +15,7 @@ class ProposalRejecter {
     private final ProposalRepository proposalRepository;
     private final AdministratorRepository administratorRepository;
 
-    public Option<FailedToRejectProposal> rejectProposal(UserId userId, ProposalId proposalId) {
+    Option<FailedToRejectProposal> rejectProposal(UserId userId, ProposalId proposalId) {
         if (!userIsAdministrator(userId))
             return Option.of(FailedToRejectProposal.USER_IS_NOT_ADMINISTRATOR);
         return proposalRepository

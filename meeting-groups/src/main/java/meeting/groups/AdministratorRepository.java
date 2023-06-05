@@ -10,7 +10,7 @@ interface AdministratorRepository extends Repository<Administrator, String> {
 
     class InMemory extends InMemoryRepository<Administrator, String> implements AdministratorRepository {
 
-        public InMemory(List<Administrator> entities, Function<Administrator, String> idGetter) {
+        InMemory(List<Administrator> entities, Function<Administrator, String> idGetter) {
             super(entities, idGetter);
         }
     }

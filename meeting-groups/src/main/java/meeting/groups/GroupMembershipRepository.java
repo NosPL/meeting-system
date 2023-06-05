@@ -13,7 +13,7 @@ interface GroupMembershipRepository extends Repository<GroupMembership, String> 
 
     class InMemory extends InMemoryRepository<GroupMembership, String> implements GroupMembershipRepository {
 
-        public InMemory(List<GroupMembership> entities, Function<GroupMembership, String> idGetter) {
+        InMemory(List<GroupMembership> entities, Function<GroupMembership, String> idGetter) {
             super(entities, idGetter);
         }
 

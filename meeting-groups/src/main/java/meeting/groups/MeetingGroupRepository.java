@@ -15,7 +15,7 @@ interface MeetingGroupRepository extends Repository<MeetingGroup, String> {
 
     class InMemory extends InMemoryRepository<MeetingGroup, String> implements MeetingGroupRepository {
 
-        public InMemory(List<MeetingGroup> entities, Function<MeetingGroup, String> idGetter) {
+        InMemory(List<MeetingGroup> entities, Function<MeetingGroup, String> idGetter) {
             super(entities, idGetter);
         }
 
