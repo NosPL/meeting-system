@@ -5,6 +5,10 @@ import commons.dto.UserId;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import meeting.groups.dto.*;
+import meeting.groups.query.dto.MeetingGroupDetails;
+import meeting.groups.query.dto.ProposalDto;
+
+import java.util.List;
 
 public interface MeetingGroupsFacade {
 
@@ -23,4 +27,8 @@ public interface MeetingGroupsFacade {
     void addAdministrator(UserId administratorId);
 
     void removeAdministrator(UserId administratorId);
+
+    List<ProposalDto> findAllProposalsByOrganizer(UserId userId);
+
+    Option<MeetingGroupDetails> findMeetingGroupDetails(MeetingGroupId meetingGroupId);
 }

@@ -7,6 +7,7 @@ import meeting.groups.dto.ProposalDraft;
 import meeting.groups.dto.ProposalId;
 import meeting.groups.dto.ProposalRejected;
 
+import static io.vavr.control.Either.left;
 import static io.vavr.control.Either.right;
 import static meeting.groups.dto.ProposalRejected.*;
 import static meeting.groups.dto.ProposalRejected.PROPOSAL_WITH_THE_SAME_GROUP_NAME_ALREADY_EXISTS;
@@ -20,13 +21,13 @@ class ProposalSubmitter {
 
     Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDraft proposalDraft) {
         if (!activeUserSubscriptions.contains(userId))
-            return Either.left(SUBSCRIPTION_NOT_ACTIVE);
+            return left(SUBSCRIPTION_NOT_ACTIVE);
         if (meetingGroupsPerUserLimitExceeded(userId))
-            return Either.left(GROUP_LIMIT_PER_USER_EXCEEDED);
+            return left(GROUP_LIMIT_PER_USER_EXCEEDED);
         if (groupWithNameAlreadyExists(proposalDraft.getGroupName()))
-            return Either.left(MEETING_GROUP_WITH_PROPOSED_NAME_ALREADY_EXISTS);
+            return left(MEETING_GROUP_WITH_PROPOSED_NAME_ALREADY_EXISTS);
         if (proposalWithSameGroupNameIsAlreadySubmitted(proposalDraft.getGroupName()))
-            return Either.left(PROPOSAL_WITH_THE_SAME_GROUP_NAME_ALREADY_EXISTS);
+            return left(PROPOSAL_WITH_THE_SAME_GROUP_NAME_ALREADY_EXISTS);
         Proposal proposal = Proposal.createFrom(userId, proposalDraft);
         String proposalId = proposalRepository.save(proposal);
         return right(new ProposalId(proposalId));

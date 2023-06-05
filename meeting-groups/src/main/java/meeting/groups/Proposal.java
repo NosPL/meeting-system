@@ -10,6 +10,7 @@ import lombok.Value;
 import meeting.groups.dto.FailedToRejectProposal;
 import meeting.groups.dto.ProposalAcceptanceRejected;
 import meeting.groups.dto.ProposalDraft;
+import meeting.groups.query.dto.ProposalDto;
 
 import java.util.UUID;
 
@@ -46,6 +47,19 @@ class Proposal {
             return of(PROPOSAL_IS_ALREADY_REJECTED);
         this.state = State.PROPOSAL_REJECTED;
         return Option.none();
+    }
+
+    ProposalDto toDto() {
+        return new ProposalDto(id, organizerId, groupName, toDto(state));
+    }
+
+    private ProposalDto.State toDto(State state) {
+        if (state == State.WAITING_FOR_ADMIN_DECISION)
+            return ProposalDto.State.WAITING;
+        if (state == State.PROPOSAL_ACCEPTED)
+            return ProposalDto.State.ACCEPTED;
+        else
+            return ProposalDto.State.REJECTED;
     }
 
     boolean isWaitingForAdministratorDecision() {

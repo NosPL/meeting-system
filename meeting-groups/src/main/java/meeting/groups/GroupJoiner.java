@@ -6,6 +6,8 @@ import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import meeting.groups.dto.JoinGroupFailure;
 
+import static io.vavr.control.Option.none;
+import static io.vavr.control.Option.of;
 import static meeting.groups.dto.JoinGroupFailure.*;
 import static meeting.groups.dto.JoinGroupFailure.USER_IS_GROUP_ORGANIZER;
 
@@ -17,15 +19,19 @@ class GroupJoiner {
 
     Option<JoinGroupFailure> joinGroup(UserId newMemberId, MeetingGroupId meetingGroupId) {
         if (!activeUserSubscriptions.contains(newMemberId))
-            return Option.of(USER_SUBSCRIPTION_IS_NOT_ACTIVE);
-        if (groupMembershipRepository.findByMemberIdAndGroupId(newMemberId.getId(), meetingGroupId.getId()).isDefined())
-            return Option.of(USER_ALREADY_JOINED_GROUP);
+            return of(USER_SUBSCRIPTION_IS_NOT_ACTIVE);
+        if (userIsMemberOfMeetingGroup(newMemberId, meetingGroupId))
+            return of(USER_ALREADY_JOINED_GROUP);
         if (!meetingGroupExists(meetingGroupId))
-            return Option.of(MEETING_GROUP_DOES_NOT_EXIST);
+            return of(MEETING_GROUP_DOES_NOT_EXIST);
         if (userIsGroupOrganizer(newMemberId, meetingGroupId))
-            return Option.of(USER_IS_GROUP_ORGANIZER);
+            return of(USER_IS_GROUP_ORGANIZER);
         groupMembershipRepository.save(new GroupMembership(newMemberId.getId(), meetingGroupId.getId()));
-        return Option.none();
+        return none();
+    }
+
+    private boolean userIsMemberOfMeetingGroup(UserId newMemberId, MeetingGroupId meetingGroupId) {
+        return groupMembershipRepository.findByMemberIdAndGroupId(newMemberId.getId(), meetingGroupId.getId()).isDefined();
     }
 
     private boolean userIsGroupOrganizer(UserId userId, MeetingGroupId meetingGroupId) {

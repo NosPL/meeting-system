@@ -7,12 +7,19 @@ import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meeting.groups.dto.*;
+import meeting.groups.query.dto.MeetingGroupDetails;
+import meeting.groups.query.dto.ProposalDto;
+
+import java.util.List;
 
 @AllArgsConstructor
 @Slf4j
 class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
     private final ActiveUserSubscriptions activeUserSubscriptions;
     private final AdministratorRepository administratorRepository;
+    private final ProposalRepository proposalRepository;
+    private final MeetingGroupRepository meetingGroupRepository;
+    private final GroupMembershipRepository membershipRepository;
     private final ProposalSubmitter proposalSubmitter;
     private final ProposalAccepter proposalAccepter;
     private final ProposalRejecter proposalRejecter;
@@ -56,5 +63,34 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
     @Override
     public void removeAdministrator(UserId administratorId) {
         administratorRepository.removeById(administratorId.getId());
+    }
+
+    @Override
+    public List<ProposalDto> findAllProposalsByOrganizer(UserId userId) {
+        return proposalRepository
+                .findByOrganizerId(userId)
+                .stream()
+                .map(Proposal::toDto)
+                .toList();
+    }
+
+    @Override
+    public Option<MeetingGroupDetails> findMeetingGroupDetails(MeetingGroupId meetingGroupId) {
+        List<String> groupMembers = getGroupMembers(meetingGroupId);
+        return meetingGroupRepository
+                .findById(meetingGroupId.getId())
+                .map(meetingGroup -> toDto(meetingGroup, groupMembers));
+    }
+
+    private List<String> getGroupMembers(MeetingGroupId meetingGroupId) {
+        return membershipRepository
+                .findByGroupId(meetingGroupId.getId())
+                .stream()
+                .map(GroupMembership::getMemberId)
+                .toList();
+    }
+
+    private MeetingGroupDetails toDto(MeetingGroup meetingGroup, List<String> groupMembers) {
+        return new MeetingGroupDetails(meetingGroup.getId(), meetingGroup.getName(), meetingGroup.getOrganizerId(), groupMembers);
     }
 }

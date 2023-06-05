@@ -11,6 +11,8 @@ interface GroupMembershipRepository extends Repository<GroupMembership, String> 
 
     Option<GroupMembership> findByMemberIdAndGroupId(String memberId, String groupId);
 
+    List<GroupMembership> findByGroupId(String groupId);
+
     class InMemory extends InMemoryRepository<GroupMembership, String> implements GroupMembershipRepository {
 
         InMemory(List<GroupMembership> entities, Function<GroupMembership, String> idGetter) {
@@ -26,6 +28,14 @@ interface GroupMembershipRepository extends Repository<GroupMembership, String> 
                     .findAny()
                     .map(Option::of)
                     .orElse(Option.none());
+        }
+
+        @Override
+        public List<GroupMembership> findByGroupId(String groupId) {
+            return entities
+                    .stream()
+                    .filter(groupMembership -> groupMembership.getMeetingGroupId().equals(groupId))
+                    .toList();
         }
     }
 }

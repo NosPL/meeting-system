@@ -8,7 +8,9 @@ import meeting.groups.dto.ProposalId;
 
 import java.util.function.Function;
 
+import static io.vavr.control.Option.of;
 import static meeting.groups.dto.FailedToRejectProposal.PROPOSAL_WITH_GIVEN_ID_DOESNT_EXIST;
+import static meeting.groups.dto.FailedToRejectProposal.USER_IS_NOT_ADMINISTRATOR;
 
 @AllArgsConstructor
 class ProposalRejecter {
@@ -17,7 +19,7 @@ class ProposalRejecter {
 
     Option<FailedToRejectProposal> rejectProposal(UserId userId, ProposalId proposalId) {
         if (!userIsAdministrator(userId))
-            return Option.of(FailedToRejectProposal.USER_IS_NOT_ADMINISTRATOR);
+            return of(USER_IS_NOT_ADMINISTRATOR);
         return proposalRepository
                 .findById(proposalId.getId())
                 .toEither(PROPOSAL_WITH_GIVEN_ID_DOESNT_EXIST)

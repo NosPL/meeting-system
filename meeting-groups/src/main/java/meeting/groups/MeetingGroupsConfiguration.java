@@ -23,7 +23,16 @@ public class MeetingGroupsConfiguration {
         var proposalAccepter = new ProposalAccepter(proposalRepository, meetingGroupRepository, administratorRepository, eventPublisher);
         var proposalRejecter = new ProposalRejecter(proposalRepository, administratorRepository);
         var groupJoiner = new GroupJoiner(activeUserSubscriptions, groupMembershipRepository, meetingGroupRepository);
-        var meetingGroups = new MeetingGroupsFacadeImpl(activeUserSubscriptions, administratorRepository, proposalSubmitter, proposalAccepter, proposalRejecter, groupJoiner);
+        var meetingGroups = new MeetingGroupsFacadeImpl(
+                activeUserSubscriptions,
+                administratorRepository,
+                proposalRepository,
+                meetingGroupRepository,
+                groupMembershipRepository,
+                proposalSubmitter,
+                proposalAccepter,
+                proposalRejecter,
+                groupJoiner);
         return new LogsDecorator(meetingGroups);
     }
 
