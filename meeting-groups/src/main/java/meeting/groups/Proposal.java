@@ -26,7 +26,7 @@ import static meeting.groups.dto.ProposalAcceptanceRejected.PROPOSAL_WAS_ALREADY
 @Getter
 class Proposal {
     private String id;
-    private String creatorId;
+    private String organizerId;
     private String groupName;
     private State state;
 
@@ -36,7 +36,7 @@ class Proposal {
         if (state == State.PROPOSAL_REJECTED)
             return left(PROPOSAL_WAS_ALREADY_REJECTED);
         this.state = State.PROPOSAL_ACCEPTED;
-        return right(new ProposalAccepted(id, creatorId, groupName));
+        return right(new ProposalAccepted(id, organizerId, groupName));
     }
 
     Option<FailedToRejectProposal> reject() {
@@ -65,7 +65,7 @@ class Proposal {
     @Value
     static class ProposalAccepted {
         String id;
-        String creatorId;
+        String organizerId;
         String groupName;
     }
 }

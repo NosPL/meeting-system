@@ -47,12 +47,12 @@ class ProposalSubmitter {
     }
 
     private int getMeetingGroupsCountOfUser(UserId userId) {
-        return meetingGroupRepository.findByCreatorId(userId).size();
+        return meetingGroupRepository.findByOrganizerId(userId).size();
     }
 
     private long getWaitingProposalsCountOfUser(UserId userId) {
         return proposalRepository
-                .findByUserId(userId)
+                .findByOrganizerId(userId)
                 .stream()
                 .filter(Proposal::isWaitingForAdministratorDecision)
                 .count();

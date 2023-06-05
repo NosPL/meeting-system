@@ -11,7 +11,7 @@ import java.util.function.Function;
 interface ProposalRepository extends Repository<Proposal, String> {
     boolean existsByGroupName(String groupName);
 
-    Collection<Proposal> findByUserId(UserId userId);
+    Collection<Proposal> findByOrganizerId(UserId userId);
 
     class InMemory extends InMemoryRepository<Proposal, String> implements ProposalRepository {
 
@@ -27,10 +27,10 @@ interface ProposalRepository extends Repository<Proposal, String> {
         }
 
         @Override
-        public Collection<Proposal> findByUserId(UserId userId) {
+        public Collection<Proposal> findByOrganizerId(UserId userId) {
             return entities
                     .stream()
-                    .filter(meetingGroup -> meetingGroup.getCreatorId().equals(userId.getId()))
+                    .filter(meetingGroup -> meetingGroup.getOrganizerId().equals(userId.getId()))
                     .toList();
         }
     }

@@ -15,7 +15,7 @@ class MeetingGroup {
     private String organizerId;
 
     static MeetingGroup createFromProposal(ProposalAccepted proposalAccepted) {
-        return new MeetingGroup(UUID.randomUUID().toString(), proposalAccepted.getGroupName(), proposalAccepted.getCreatorId());
+        return new MeetingGroup(UUID.randomUUID().toString(), proposalAccepted.getGroupName(), proposalAccepted.getOrganizerId());
     }
 
     boolean isOrganizer(UserId userId) {

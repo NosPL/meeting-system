@@ -11,7 +11,7 @@ import java.util.function.Function;
 interface MeetingGroupRepository extends Repository<MeetingGroup, String> {
     boolean existsByGroupName(String groupName);
 
-    Collection<MeetingGroup> findByCreatorId(UserId userId);
+    Collection<MeetingGroup> findByOrganizerId(UserId userId);
 
     class InMemory extends InMemoryRepository<MeetingGroup, String> implements MeetingGroupRepository {
 
@@ -27,7 +27,7 @@ interface MeetingGroupRepository extends Repository<MeetingGroup, String> {
         }
 
         @Override
-        public Collection<MeetingGroup> findByCreatorId(UserId userId) {
+        public Collection<MeetingGroup> findByOrganizerId(UserId userId) {
             return entities
                     .stream()
                     .filter(meetingGroup -> meetingGroup.getOrganizerId().equals(userId.getId()))
