@@ -26,14 +26,14 @@ class ProposalAccepter {
                 .findById(proposalId.getId())
                 .toEither(PROPOSAL_WITH_GIVEN_ID_DOES_NOT_EXIST)
                 .flatMap(Proposal::accept)
-                .map(this::createMeetingGroup)
-                .peek(eventPublisher::newMeetingGroupCreated);
-    }
-
-    private MeetingGroupId createMeetingGroup(Proposal.ProposalAccepted proposalAccepted) {
-        MeetingGroup meetingGroup = MeetingGroup.createFromProposal(proposalAccepted);
-        String meetingGroupId = meetingGroupRepository.save(meetingGroup);
-        return new MeetingGroupId(meetingGroupId);
+                .map(MeetingGroup::createFromProposal)
+                .peek(meetingGroupRepository::save)
+                .map(meetingGroup -> {
+                    UserId organizerId = new UserId(meetingGroup.getOrganizerId());
+                    MeetingGroupId meetingGroupId = new MeetingGroupId(meetingGroup.getId());
+                    eventPublisher.newMeetingGroupCreated(organizerId, meetingGroupId);
+                    return meetingGroupId;
+                });
     }
 
     private boolean userIsAdministrator(UserId userId) {

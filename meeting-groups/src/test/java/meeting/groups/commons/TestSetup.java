@@ -102,4 +102,8 @@ public class TestSetup {
         meetingGroupsFacade.rejectProposal(userId(), proposalId);
         return new ProposalDto(proposalId.getId(), userId().getId(), proposalDraft.getGroupName(), REJECTED);
     }
+
+    protected UserId randomUserId() {
+        return new UserId(UUID.randomUUID().toString());
+    }
 }

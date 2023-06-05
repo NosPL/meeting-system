@@ -3,6 +3,9 @@ package meeting.groups;
 import meeting.groups.commons.TestSetup;
 import org.junit.Test;
 
+import java.util.List;
+
+import static io.vavr.Tuple.of;
 import static io.vavr.control.Either.left;
 import static meeting.groups.dto.ProposalAcceptanceRejected.*;
 import static org.junit.Assert.assertEquals;
@@ -64,13 +67,15 @@ public class AcceptingMeetingGroupProposal extends TestSetup {
     public void administratorShouldSuccessfullyAcceptSubmittedMeetingGroupProposal() {
 //        given that user is the administrator
         meetingGroupsFacade.addAdministrator(userId());
+//        and user subscription got renewed
+        meetingGroupsFacade.subscriptionRenewed(userId());
 //        and group proposal was submitted
-        var proposalId = submitRandomProposal();
+        var proposalId = meetingGroupsFacade.submitMeetingGroupProposal(userId(), randomProposal()).get();
 //        when user tries to accept group proposal
         var result = meetingGroupsFacade.acceptProposal(userId(), proposalId);
 //        then he succeeds
         assertTrue(result.isRight());
 //        and 'new meeting group was created' event got emitted
-        assert eventPublisherMock.groupCreatedEventInvoked(result.get());
+        assert eventPublisherMock.groupCreatedEventInvoked(List.of(of(userId(), result.get())));
     }
 }

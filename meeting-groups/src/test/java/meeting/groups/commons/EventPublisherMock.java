@@ -1,6 +1,7 @@
 package meeting.groups.commons;
 
 import commons.dto.MeetingGroupId;
+import commons.dto.OrganizerId;
 import commons.dto.UserId;
 import commons.event.publisher.EventPublisher;
 import io.vavr.Tuple;
@@ -12,13 +13,13 @@ import java.util.List;
 
 @Slf4j
 public class EventPublisherMock implements EventPublisher {
-    private final LinkedList<MeetingGroupId> groupCreatedInvocations = new LinkedList<>();
+    private final LinkedList<Tuple2<UserId, MeetingGroupId>> groupCreatedInvocations = new LinkedList<>();
     private final LinkedList<Tuple2<UserId, MeetingGroupId>> memberJoinedGroupInvocations = new LinkedList<>();
 
     @Override
-    public void newMeetingGroupCreated(MeetingGroupId meetingGroupId) {
+    public void newMeetingGroupCreated(UserId userId, MeetingGroupId meetingGroupId) {
         log.info("'new meeting group created' event was emitted, meeting group id {}", meetingGroupId.getId());
-        groupCreatedInvocations.addLast(meetingGroupId);
+        groupCreatedInvocations.addLast(Tuple.of(userId, meetingGroupId));
     }
 
     @Override
@@ -27,8 +28,8 @@ public class EventPublisherMock implements EventPublisher {
         memberJoinedGroupInvocations.addLast(Tuple.of(userId, meetingGroupId));
     }
 
-    public boolean groupCreatedEventInvoked(MeetingGroupId...meetingGroupId) {
-        return groupCreatedInvocations.equals(List.of(meetingGroupId));
+    public boolean groupCreatedEventInvoked(List<Tuple2<UserId, MeetingGroupId>> invocations) {
+        return groupCreatedInvocations.equals(invocations);
     }
 
     public boolean newMemberJoinedGroupEventInvoked(List<Tuple2<UserId, MeetingGroupId>> invocations) {

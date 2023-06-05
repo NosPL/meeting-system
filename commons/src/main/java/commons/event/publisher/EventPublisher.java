@@ -5,7 +5,7 @@ import commons.dto.UserId;
 
 public interface EventPublisher {
 
-    void newMeetingGroupCreated(MeetingGroupId meetingGroupId);
+    void newMeetingGroupCreated(UserId userId, MeetingGroupId meetingGroupId);
 
     void newMemberJoinedMeetingGroup(UserId userId, MeetingGroupId meetingGroupId);
 }
