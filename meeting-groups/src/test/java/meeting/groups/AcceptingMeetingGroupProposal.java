@@ -71,6 +71,6 @@ public class AcceptingMeetingGroupProposal extends TestSetup {
 //        then he succeeds
         assertTrue(result.isRight());
 //        and 'new meeting group was created' event got emitted
-        eventPublisherMock.groupCreatedEventInvoked(result.get());
+        assert eventPublisherMock.groupCreatedEventInvoked(result.get());
     }
 }

@@ -2,6 +2,7 @@ package meeting.groups;
 
 import commons.dto.MeetingGroupId;
 import commons.dto.UserId;
+import commons.event.publisher.EventPublisher;
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import meeting.groups.dto.JoinGroupFailure;
@@ -16,6 +17,7 @@ class GroupJoiner {
     private final ActiveUserSubscriptions activeUserSubscriptions;
     private final GroupMembershipRepository groupMembershipRepository;
     private final MeetingGroupRepository meetingGroupRepository;
+    private final EventPublisher eventPublisher;
 
     Option<JoinGroupFailure> joinGroup(UserId newMemberId, MeetingGroupId meetingGroupId) {
         if (!activeUserSubscriptions.contains(newMemberId))
@@ -27,6 +29,7 @@ class GroupJoiner {
         if (userIsGroupOrganizer(newMemberId, meetingGroupId))
             return of(USER_IS_GROUP_ORGANIZER);
         groupMembershipRepository.save(new GroupMembership(newMemberId.getId(), meetingGroupId.getId()));
+        eventPublisher.newMemberJoinedMeetingGroup(newMemberId, meetingGroupId);
         return none();
     }
 

@@ -22,7 +22,7 @@ public class MeetingGroupsConfiguration {
         var proposalSubmitter = new ProposalSubmitter(proposalRepository, meetingGroupRepository, activeUserSubscriptions);
         var proposalAccepter = new ProposalAccepter(proposalRepository, meetingGroupRepository, administratorRepository, eventPublisher);
         var proposalRejecter = new ProposalRejecter(proposalRepository, administratorRepository);
-        var groupJoiner = new GroupJoiner(activeUserSubscriptions, groupMembershipRepository, meetingGroupRepository);
+        var groupJoiner = new GroupJoiner(activeUserSubscriptions, groupMembershipRepository, meetingGroupRepository, eventPublisher);
         var meetingGroups = new MeetingGroupsFacadeImpl(
                 activeUserSubscriptions,
                 administratorRepository,
