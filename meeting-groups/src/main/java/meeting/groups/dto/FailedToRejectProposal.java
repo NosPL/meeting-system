@@ -1,0 +1,8 @@
+package meeting.groups.dto;
+
+public enum FailedToRejectProposal {
+    USER_IS_NOT_ADMINISTRATOR,
+    PROPOSAL_WITH_GIVEN_ID_DOESNT_EXIST,
+    PROPOSAL_IS_ALREADY_ACCEPTED,
+    PROPOSAL_IS_ALREADY_REJECTED
+}
