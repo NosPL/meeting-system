@@ -4,7 +4,7 @@ import commons.dto.MeetingGroupId;
 import commons.dto.UserId;
 import meeting.groups.MeetingGroupsFacade;
 import meeting.groups.MeetingGroupsConfiguration;
-import meeting.groups.dto.ProposalDto;
+import meeting.groups.dto.ProposalDraft;
 import meeting.groups.dto.ProposalId;
 import org.junit.Before;
 
@@ -28,25 +28,25 @@ public class TestSetup {
         }
     }
 
-    protected MeetingGroupId createGroup(UserId userId, ProposalDto proposal) {
+    protected MeetingGroupId createGroup(UserId userId, ProposalDraft proposal) {
         return AutomatedProcesses.createGroup(meetingGroupsFacade, userId, proposal);
     }
 
-    protected MeetingGroupId createGroup(ProposalDto proposal) {
+    protected MeetingGroupId createGroup(ProposalDraft proposal) {
         UserId userId = new UserId(UUID.randomUUID().toString());
         return AutomatedProcesses.createGroup(meetingGroupsFacade, userId, proposal);
     }
 
-    protected ProposalDto randomProposal() {
-        return new ProposalDto(UUID.randomUUID().toString());
+    protected ProposalDraft randomProposal() {
+        return new ProposalDraft(UUID.randomUUID().toString());
     }
 
     protected UserId userId() {
         return userId;
     }
 
-    protected ProposalDto proposalWithName(String groupName) {
-        return new ProposalDto(groupName);
+    protected ProposalDraft proposalWithName(String groupName) {
+        return new ProposalDraft(groupName);
     }
 
     protected String randomGroupName() {

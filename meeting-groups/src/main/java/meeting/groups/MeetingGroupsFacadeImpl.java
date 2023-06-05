@@ -34,8 +34,8 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
     }
 
     @Override
-    public Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDto proposalDto) {
-        return proposalSubmitter.submitMeetingGroupProposal(userId, proposalDto);
+    public Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDraft proposalDraft) {
+        return proposalSubmitter.submitMeetingGroupProposal(userId, proposalDraft);
     }
 
     @Override

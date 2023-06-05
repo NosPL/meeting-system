@@ -33,10 +33,10 @@ class LogsDecorator implements MeetingGroupsFacade {
     }
 
     @Override
-    public Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDto proposalDto) {
+    public Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDraft proposalDraft) {
         return meetingGroups
-                .submitMeetingGroupProposal(userId, proposalDto)
-                .peek(proposalId -> log.info("user submitted proposal, user id {}, proposal name {}, proposal id {}", userId.getId(), proposalDto.getGroupName(), proposalId.getId()))
+                .submitMeetingGroupProposal(userId, proposalDraft)
+                .peek(proposalId -> log.info("user submitted proposal, user id {}, proposal name {}, proposal id {}", userId.getId(), proposalDraft.getGroupName(), proposalId.getId()))
                 .peekLeft(proposalRejected -> log.info("failed to submit proposal, user id {}, reason {}", userId.getId(), proposalRejected));
     }
 

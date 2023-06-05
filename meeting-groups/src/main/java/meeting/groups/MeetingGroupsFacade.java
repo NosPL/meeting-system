@@ -14,7 +14,7 @@ public interface MeetingGroupsFacade {
 
     Option<JoinGroupFailure> joinGroup(UserId userId, MeetingGroupId meetingGroupId);
 
-    Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDto proposalDto);
+    Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDraft proposalDraft);
 
     Either<ProposalAcceptanceRejected, MeetingGroupId> acceptProposal(UserId userId, ProposalId proposalId);
 

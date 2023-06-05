@@ -3,7 +3,7 @@ package meeting.groups;
 import commons.dto.UserId;
 import io.vavr.control.Either;
 import lombok.AllArgsConstructor;
-import meeting.groups.dto.ProposalDto;
+import meeting.groups.dto.ProposalDraft;
 import meeting.groups.dto.ProposalId;
 import meeting.groups.dto.ProposalRejected;
 
@@ -18,16 +18,16 @@ class ProposalSubmitter {
     private final MeetingGroupRepository meetingGroupRepository;
     private final ActiveUserSubscriptions activeUserSubscriptions;
 
-    Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDto proposalDto) {
+    Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDraft proposalDraft) {
         if (!activeUserSubscriptions.contains(userId))
             return Either.left(SUBSCRIPTION_NOT_ACTIVE);
         if (meetingGroupsPerUserLimitExceeded(userId))
             return Either.left(GROUP_LIMIT_PER_USER_EXCEEDED);
-        if (groupWithNameAlreadyExists(proposalDto.getGroupName()))
+        if (groupWithNameAlreadyExists(proposalDraft.getGroupName()))
             return Either.left(MEETING_GROUP_WITH_PROPOSED_NAME_ALREADY_EXISTS);
-        if (proposalWithSameGroupNameIsAlreadySubmitted(proposalDto.getGroupName()))
+        if (proposalWithSameGroupNameIsAlreadySubmitted(proposalDraft.getGroupName()))
             return Either.left(PROPOSAL_WITH_THE_SAME_GROUP_NAME_ALREADY_EXISTS);
-        Proposal proposal = Proposal.createFrom(userId, proposalDto);
+        Proposal proposal = Proposal.createFrom(userId, proposalDraft);
         String proposalId = proposalRepository.save(proposal);
         return right(new ProposalId(proposalId));
     }

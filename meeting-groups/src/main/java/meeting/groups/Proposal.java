@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Value;
 import meeting.groups.dto.FailedToRejectProposal;
 import meeting.groups.dto.ProposalAcceptanceRejected;
-import meeting.groups.dto.ProposalDto;
+import meeting.groups.dto.ProposalDraft;
 
 import java.util.UUID;
 
@@ -52,8 +52,8 @@ class Proposal {
         return state == State.WAITING_FOR_ADMIN_DECISION;
     }
 
-    static Proposal createFrom(UserId userId, ProposalDto proposalDto) {
-        return new Proposal(UUID.randomUUID().toString(), userId.getId(), proposalDto.getGroupName(), State.WAITING_FOR_ADMIN_DECISION);
+    static Proposal createFrom(UserId userId, ProposalDraft proposalDraft) {
+        return new Proposal(UUID.randomUUID().toString(), userId.getId(), proposalDraft.getGroupName(), State.WAITING_FOR_ADMIN_DECISION);
     }
 
     private enum State {
