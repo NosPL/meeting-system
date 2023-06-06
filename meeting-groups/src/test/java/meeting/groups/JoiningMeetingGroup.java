@@ -1,11 +1,14 @@
 package meeting.groups;
 
 import commons.dto.GroupMemberId;
+import commons.dto.MeetingGroupId;
+import commons.dto.UserId;
 import io.vavr.control.Option;
 import meeting.groups.commons.TestSetup;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.UUID;
 
 import static io.vavr.Tuple.of;
 import static meeting.groups.dto.JoinGroupFailure.*;
@@ -15,12 +18,8 @@ public class JoiningMeetingGroup extends TestSetup {
 
     @Test
     public void joiningGroupThatDoesNotExistShouldFail() {
-//        given that user subscription got renewed
-        meetingGroupsFacade.subscriptionRenewed(userId());
-//        and some group got created
-        var existingGroupId = createGroup(randomProposal());
-//        when user tries to join group with different group id
-        var result = meetingGroupsFacade.joinGroup(userId(), idDifferentThan(existingGroupId));
+//        when subscribed user tries to join non-existent random meting group
+        var result = meetingGroupsFacade.joinGroup(subscribedUser, randomMeetingGroupId());
 //        then he fails because group does not exist
         assertEquals(Option.of(MEETING_GROUP_DOES_NOT_EXIST), result);
     }
@@ -28,11 +27,9 @@ public class JoiningMeetingGroup extends TestSetup {
     @Test
     public void joiningGroupWithoutActiveSubscriptionShouldFail() {
 //        given that meeting group got created
-        var meetingGroupId = createGroup(randomProposal());
-//        and user subscription expired
-        meetingGroupsFacade.subscriptionExpired(userId());
-//        when user tries to join created meeting group
-        var result = meetingGroupsFacade.joinGroup(userId(), meetingGroupId);
+        var meetingGroupId = createMeetingGroup();
+//        when not subscribed user tries to join created meeting group
+        var result = meetingGroupsFacade.joinGroup(notSubscribedUser, meetingGroupId);
 //        then he fails because user does not have active subscription
         assertEquals(Option.of(USER_SUBSCRIPTION_IS_NOT_ACTIVE), result);
     }
@@ -40,31 +37,33 @@ public class JoiningMeetingGroup extends TestSetup {
     @Test
     public void joiningSameGroupTwiceShouldFail() {
 //        given that meeting group got created
-        var meetingGroupId = createGroup(randomProposal());
-//        and user subscription got renewed
-        meetingGroupsFacade.subscriptionRenewed(userId());
-//        and user already joined group
-        assert meetingGroupsFacade.joinGroup(userId(), meetingGroupId).isEmpty();
+        var meetingGroupId = createMeetingGroup();
+//        and subscribed user already joined group
+        assert meetingGroupsFacade.joinGroup(subscribedUser, meetingGroupId).isEmpty();
 //        when he tries to join this group again
-        var result = meetingGroupsFacade.joinGroup(userId(), meetingGroupId);
+        var result = meetingGroupsFacade.joinGroup(subscribedUser, meetingGroupId);
         assertEquals(Option.of(USER_ALREADY_JOINED_GROUP), result);
     }
 
     @Test
-    public void userWithActiveSubscriptionShouldBeAbleToJoinMultipleGroups() {
-//        given that multiple meeting groups got created
-        var meetingGroupId1 = createGroup(randomProposal());
-        var meetingGroupId2 = createGroup(randomProposal());
-        var meetingGroupId3 = createGroup(randomProposal());
-//        and user subscription got renewed
-        meetingGroupsFacade.subscriptionRenewed(userId());
-//        when user tries to join all these groups
-//        then he succeeds every time
-        assert meetingGroupsFacade.joinGroup(userId(), meetingGroupId1).isEmpty();
-        assert meetingGroupsFacade.joinGroup(userId(), meetingGroupId2).isEmpty();
-        assert meetingGroupsFacade.joinGroup(userId(), meetingGroupId3).isEmpty();
-//        and 'new member joined meeting group' event should be emitted 3 times
-        var expectedInvocations = List.of(of(groupMemberId(), meetingGroupId1), of(groupMemberId(), meetingGroupId2), of(groupMemberId(), meetingGroupId3));
+    public void userWithActiveSubscriptionShouldBeAbleToJoinMeetingGroup() {
+//        given that meeting group was created
+        var meetingGroupId = createMeetingGroup();
+//        when subscribed user tries to join the meeting group
+        var result = meetingGroupsFacade.joinGroup(subscribedUser, meetingGroupId);
+//        then he succeeds
+        assertEquals(Option.none(), result);
+//        and 'new member joined meeting group' event was emitted
+        newMemberJoinedGroupEventInvoked(subscribedUser, meetingGroupId);
+    }
+
+    private void newMemberJoinedGroupEventInvoked(UserId userId, MeetingGroupId meetingGroupId) {
+        var groupMemberId = new GroupMemberId(userId.getId());
+        var expectedInvocations = List.of(of(groupMemberId, meetingGroupId));
         assert eventPublisherMock.newMemberJoinedGroupEventInvoked(expectedInvocations);
+    }
+
+    private MeetingGroupId randomMeetingGroupId() {
+        return new MeetingGroupId(UUID.randomUUID().toString());
     }
 }

@@ -1,69 +1,97 @@
 package meeting.groups;
 
+import commons.dto.GroupMemberId;
+import commons.dto.GroupOrganizerId;
+import commons.dto.MeetingGroupId;
+import commons.dto.UserId;
 import io.vavr.control.Option;
 import meeting.groups.commons.TestSetup;
-import org.junit.Before;
+import meeting.groups.dto.ProposalDraft;
+import meeting.groups.dto.ProposalId;
+import meeting.groups.query.dto.MeetingGroupDetails;
+import meeting.groups.query.dto.ProposalDto;
+import meeting.groups.query.dto.ProposalDto.State;
 import org.junit.Test;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.IntStream;
 
+import static meeting.groups.query.dto.ProposalDto.State.*;
 import static org.junit.Assert.assertEquals;
 
 public class Queries extends TestSetup {
 
-    @Before
-    public void queriesSetup() {
-        meetingGroupsFacade.subscriptionRenewed(userId());
-        meetingGroupsFacade.addAdministrator(administratorId());
-    }
-
     @Test
     public void queryAllWaitingProposalsOfGivenUser() {
-//        given that user submitted proposal
-        var proposalDto = submitProposal();
-//        when user queries all proposals
-        var result = meetingGroupsFacade.findAllProposalsOfGroupOrganizer(groupOrganizerId());
-//        then he gets submitted proposal
+//        given that proposal was submitted
+        var proposalDraft = randomProposalDraft();
+        var proposalId = submitProposal(subscribedGroupOrganizer, proposalDraft);
+//        when all proposals are queried
+        var result = meetingGroupsFacade.findAllProposalsOfGroupOrganizer(subscribedGroupOrganizer);
+//        then
+        var proposalDto = proposalDto(proposalId, subscribedGroupOrganizer, proposalDraft, WAITING);
         var expected = List.of(proposalDto);
         assertEquals(expected, result);
     }
 
     @Test
     public void queryAllAcceptedProposalsOfGivenUser() {
-//        given that proposal was accepted
-        var proposalDto = submitAndAcceptProposal();
-//        when user queries all proposals
-        var result = meetingGroupsFacade.findAllProposalsOfGroupOrganizer(groupOrganizerId());
-//        then he gets proposal
-        var expected = List.of(proposalDto);
+//        given that meeting group was created
+        var proposalDraft = randomProposalDraft();
+        var proposalId = meetingGroupsFacade.submitMeetingGroupProposal(subscribedGroupOrganizer, proposalDraft).get();
+        var meetingGroupId = meetingGroupsFacade.acceptProposal(administrator, proposalId).get();
+//        when all proposals for organizers are queried
+        var result = meetingGroupsFacade.findAllProposalsOfGroupOrganizer(subscribedGroupOrganizer);
+//        then
+        var expected = List.of(proposalDto(proposalId, subscribedGroupOrganizer, proposalDraft, ACCEPTED));
         assertEquals(expected, result);
     }
 
     @Test
     public void queryAllRejectedProposalsOfGivenUser() {
 //        given that proposal was rejected
-        var proposalDto = submitAndRejectProposal();
-//        when user queries all proposals
-        var result = meetingGroupsFacade.findAllProposalsOfGroupOrganizer(groupOrganizerId());
+        var proposalDraft = randomProposalDraft();
+        var proposalId = meetingGroupsFacade.submitMeetingGroupProposal(subscribedGroupOrganizer, proposalDraft).get();
+        assert meetingGroupsFacade.rejectProposal(administrator, proposalId).isEmpty();
+//        when all proposals get queried
+        var result = meetingGroupsFacade.findAllProposalsOfGroupOrganizer(subscribedGroupOrganizer);
 //        then he gets proposal
-        var expected = List.of(proposalDto);
+        var expected = List.of(proposalDto(proposalId, subscribedGroupOrganizer, proposalDraft, REJECTED));
         assertEquals(expected, result);
     }
 
     @Test
     public void queryAllMeetingGroupsWithMembers() {
 //        given that meeting group was created
-        var proposalDraft = randomProposal();
-        var meetingGroupId = createGroup(userId(), proposalDraft);
+        String groupName = randomGroupName();
+        var meetingGroupId = createMeetingGroup(subscribedGroupOrganizer, proposalDraftWithName(groupName));
 //        and 3 users joined
-        var groupMemberId1 = joinGroup(meetingGroupId);
-        var groupMemberId2 = joinGroup(meetingGroupId);
-        var groupMemberId3 = joinGroup(meetingGroupId);
-//        when user queries meeting group details with given id
+        var groupMembers = _3usersJoined(meetingGroupId);
+//        when meeting group details by id gets queried
         var result = meetingGroupsFacade.findMeetingGroupDetails(meetingGroupId);
-//        then he gets correct meeting group details
-        var expectedGroupMembers = List.of(groupMemberId1, groupMemberId2, groupMemberId3);
-        var expected = Option.of(meetingGroupDetails(meetingGroupId, proposalDraft, expectedGroupMembers));
-        assertEquals(expected, result);
+//        then
+        var expected = new MeetingGroupDetails(meetingGroupId, groupName, subscribedGroupOrganizer, groupMembers);
+        assertEquals(Option.of(expected), result);
+    }
+
+    private List<GroupMemberId> _3usersJoined(MeetingGroupId meetingGroupId) {
+        List<GroupMemberId> groupMembers = new LinkedList<>();
+        for (int i = 0; i < 3; i++) {
+            groupMembers.add(joinGroup(meetingGroupId));
+        }
+        return groupMembers;
+    }
+
+    private ProposalDto proposalDto(ProposalId proposalId, GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft, State state) {
+        return new ProposalDto(proposalId, groupOrganizerId, proposalDraft.getGroupName(), state);
+    }
+
+    private GroupMemberId joinGroup(MeetingGroupId meetingGroupId) {
+        var userId = new UserId(UUID.randomUUID().toString());
+        meetingGroupsFacade.subscriptionRenewed(userId);
+        assert meetingGroupsFacade.joinGroup(userId, meetingGroupId).isEmpty();
+        return new GroupMemberId(userId.getId());
     }
 }

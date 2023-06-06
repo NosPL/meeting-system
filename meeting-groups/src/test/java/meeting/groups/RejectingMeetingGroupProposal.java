@@ -1,5 +1,6 @@
 package meeting.groups;
 
+import io.vavr.control.Option;
 import meeting.groups.commons.TestSetup;
 import meeting.groups.dto.ProposalId;
 import org.junit.Test;
@@ -12,63 +13,53 @@ public class RejectingMeetingGroupProposal extends TestSetup {
 
     @Test
     public void userThatIsNotAdministratorShouldFailToRejectProposal() {
-//        given that user is not administrator
-        meetingGroupsFacade.removeAdministrator(administratorId());
-//        and proposal was submitted
+//        given that proposal was submitted
         var proposalId = submitRandomProposal();
-//        when user tries to reject proposal
-        var result = meetingGroupsFacade.rejectProposal(administratorId(), proposalId);
+//        when user that is not administrator tries to reject proposal
+        var result = meetingGroupsFacade.rejectProposal(notAdministrator, proposalId);
 //        then he fails because he is not administrator
-        assertEquals(of(USER_IS_NOT_ADMINISTRATOR), result);
+        assertEquals(Option.of(USER_IS_NOT_ADMINISTRATOR), result);
     }
 
     @Test
     public void administratorShouldFailToRejectProposalThatDoesNotExist() {
-//        given that user is administrator
-        meetingGroupsFacade.addAdministrator(administratorId());
-//        when user tries reject with proposal random id
-        var result = meetingGroupsFacade.rejectProposal(administratorId(), randomProposalId());
+//        when administrator tries reject non-existent proposal
+        var result = meetingGroupsFacade.rejectProposal(administrator, randomProposalId());
 //        then he fails because proposal doesn't exist
-        assertEquals(of(PROPOSAL_WITH_GIVEN_ID_DOESNT_EXIST), result);
+        assertEquals(Option.of(PROPOSAL_WITH_GIVEN_ID_DOESNT_EXIST), result);
     }
 
     @Test
     public void administratorShouldFailToRejectProposalThatAlreadyGotRejected() {
-//        given that user is administrator
-        meetingGroupsFacade.addAdministrator(administratorId());
-//        and proposal was submitted
+//        given that proposal was submitted
         var proposalId = submitRandomProposal();
 //        and proposal was rejected
-        assert meetingGroupsFacade.rejectProposal(administratorId(), proposalId).isEmpty();
-//        when user tries to reject the same proposal again
-        var result = meetingGroupsFacade.rejectProposal(administratorId(), proposalId);
+        assert meetingGroupsFacade.rejectProposal(administrator, proposalId).isEmpty();
+//        when administrator tries to reject the same proposal again
+        var result = meetingGroupsFacade.rejectProposal(administrator, proposalId);
 //        then he fails because proposal was already rejected
-        assertEquals(of(PROPOSAL_IS_ALREADY_REJECTED), result);
+        assertEquals(Option.of(PROPOSAL_IS_ALREADY_REJECTED), result);
     }
 
     @Test
     public void administratorShouldFailToRejectProposalThatAlreadyGotAccepted() {
-//        given that user is administrator
-        meetingGroupsFacade.addAdministrator(administratorId());
-//        and proposal was submitted
+//        given that proposal was submitted
         var proposalId = submitRandomProposal();
 //        and proposal was accepted
-        assert meetingGroupsFacade.acceptProposal(administratorId(), proposalId).isRight();
-//        when user tries to reject the same proposal
-        var result = meetingGroupsFacade.rejectProposal(administratorId(), proposalId);
+        assert meetingGroupsFacade.acceptProposal(administrator, proposalId).isRight();
+//        when administrator tries to reject the same proposal
+        var result = meetingGroupsFacade.rejectProposal(administrator, proposalId);
 //        then he fails because proposal was already accepted
-        assertEquals(of(PROPOSAL_IS_ALREADY_ACCEPTED), result);
+        assertEquals(Option.of(PROPOSAL_IS_ALREADY_ACCEPTED), result);
     }
 
     @Test
     public void administratorShouldSuccessfullyRejectSubmittedProposal() {
-//        given that user is administrator
-        meetingGroupsFacade.addAdministrator(administratorId());
-//        and proposal was submitted
+//        given that proposal was submitted
         var proposalId = submitRandomProposal();
-//        when user tries to reject proposal
-        var result = meetingGroupsFacade.rejectProposal(administratorId(), proposalId);
+//        when administrator tries to reject proposal
+        var result = meetingGroupsFacade.rejectProposal(administrator, proposalId);
 //        then he succeeds
-        assert result.isEmpty();
+        assertEquals(Option.none(), result);
     }
 }
