@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import java.util.Set;
 
 @AllArgsConstructor
-class ActiveUserSubscriptions {
+class ActiveSubscriptions {
     private final Set<UserId> userIds;
 
     boolean contains(UserId userId) {

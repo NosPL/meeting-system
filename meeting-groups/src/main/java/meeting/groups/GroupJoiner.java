@@ -15,13 +15,13 @@ import static meeting.groups.dto.JoinGroupFailure.USER_IS_GROUP_ORGANIZER;
 
 @AllArgsConstructor
 class GroupJoiner {
-    private final ActiveUserSubscriptions activeUserSubscriptions;
+    private final ActiveSubscriptions activeSubscriptions;
     private final GroupMembershipRepository groupMembershipRepository;
     private final MeetingGroupRepository meetingGroupRepository;
     private final EventPublisher eventPublisher;
 
     Option<JoinGroupFailure> joinGroup(UserId userId, MeetingGroupId meetingGroupId) {
-        if (!activeUserSubscriptions.contains(userId))
+        if (!activeSubscriptions.contains(userId))
             return of(USER_SUBSCRIPTION_IS_NOT_ACTIVE);
         if (userIsMemberOfMeetingGroup(userId, meetingGroupId))
             return of(USER_ALREADY_JOINED_GROUP);

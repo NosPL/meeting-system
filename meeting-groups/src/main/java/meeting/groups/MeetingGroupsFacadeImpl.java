@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
-    private final ActiveUserSubscriptions activeUserSubscriptions;
+    private final ActiveSubscriptions activeSubscriptions;
     private final AdministratorRepository administratorRepository;
     private final ProposalRepository proposalRepository;
     private final MeetingGroupRepository meetingGroupRepository;
@@ -26,12 +26,12 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
 
     @Override
     public void subscriptionRenewed(UserId userId) {
-        activeUserSubscriptions.add(userId);
+        activeSubscriptions.add(userId);
     }
 
     @Override
     public void subscriptionExpired(UserId userId) {
-        activeUserSubscriptions.remove(userId);
+        activeSubscriptions.remove(userId);
     }
 
     @Override
