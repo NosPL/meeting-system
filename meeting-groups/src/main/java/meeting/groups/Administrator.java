@@ -1,10 +1,11 @@
 package meeting.groups;
 
+import commons.dto.AdministratorId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
 class Administrator {
-    private String id;
+    private AdministratorId administratorId;
 }

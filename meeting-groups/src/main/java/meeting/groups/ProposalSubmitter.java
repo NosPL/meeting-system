@@ -1,5 +1,6 @@
 package meeting.groups;
 
+import commons.dto.GroupOrganizerId;
 import commons.dto.UserId;
 import io.vavr.control.Either;
 import lombok.AllArgsConstructor;
@@ -19,23 +20,22 @@ class ProposalSubmitter {
     private final MeetingGroupRepository meetingGroupRepository;
     private final ActiveUserSubscriptions activeUserSubscriptions;
 
-    Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDraft proposalDraft) {
-        if (!activeUserSubscriptions.contains(userId))
+    Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft) {
+        if (!activeUserSubscriptions.contains(groupOrganizerId))
             return left(SUBSCRIPTION_NOT_ACTIVE);
-        if (meetingGroupsPerUserLimitExceeded(userId))
+        if (meetingGroupsPerUserLimitExceeded(groupOrganizerId))
             return left(GROUP_LIMIT_PER_USER_EXCEEDED);
         if (groupWithNameAlreadyExists(proposalDraft.getGroupName()))
             return left(MEETING_GROUP_WITH_PROPOSED_NAME_ALREADY_EXISTS);
         if (proposalWithSameGroupNameIsAlreadySubmitted(proposalDraft.getGroupName()))
             return left(PROPOSAL_WITH_THE_SAME_GROUP_NAME_ALREADY_EXISTS);
-        Proposal proposal = Proposal.createFrom(userId, proposalDraft);
-        String proposalId = proposalRepository.save(proposal);
-        return right(new ProposalId(proposalId));
+        var proposal = Proposal.createFrom(groupOrganizerId, proposalDraft);
+        return right(proposalRepository.save(proposal));
     }
 
-    private boolean meetingGroupsPerUserLimitExceeded(UserId userId) {
-        int meetingGroupsCount = getMeetingGroupsCountOfUser(userId);
-        long waitingProposalsCount = getWaitingProposalsCountOfUser(userId);
+    private boolean meetingGroupsPerUserLimitExceeded(GroupOrganizerId groupOrganizerId) {
+        int meetingGroupsCount = countAllGroupsOfOrganizer(groupOrganizerId);
+        long waitingProposalsCount = countAllWaitingProposalsOfOrganizer(groupOrganizerId);
         return meetingGroupsCount + waitingProposalsCount >= GROUPS_PER_USER_LIMIT;
     }
 
@@ -47,13 +47,13 @@ class ProposalSubmitter {
         return proposalRepository.existsByGroupName(groupName);
     }
 
-    private int getMeetingGroupsCountOfUser(UserId userId) {
-        return meetingGroupRepository.findByOrganizerId(userId).size();
+    private int countAllGroupsOfOrganizer(GroupOrganizerId groupOrganizerId) {
+        return meetingGroupRepository.findByOrganizerId(groupOrganizerId).size();
     }
 
-    private long getWaitingProposalsCountOfUser(UserId userId) {
+    private long countAllWaitingProposalsOfOrganizer(GroupOrganizerId groupOrganizerId) {
         return proposalRepository
-                .findByOrganizerId(userId)
+                .findByOrganizerId(groupOrganizerId)
                 .stream()
                 .filter(Proposal::isWaitingForAdministratorDecision)
                 .count();

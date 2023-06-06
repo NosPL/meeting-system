@@ -1,6 +1,7 @@
 package meeting.groups;
 
-import commons.dto.UserId;
+import commons.dto.GroupOrganizerId;
+import commons.dto.MeetingGroupId;
 import commons.repository.InMemoryRepository;
 import commons.repository.Repository;
 
@@ -8,14 +9,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-interface MeetingGroupRepository extends Repository<MeetingGroup, String> {
+interface MeetingGroupRepository extends Repository<MeetingGroup, MeetingGroupId> {
     boolean existsByGroupName(String groupName);
 
-    Collection<MeetingGroup> findByOrganizerId(UserId userId);
+    Collection<MeetingGroup> findByOrganizerId(GroupOrganizerId groupOrganizerId);
 
-    class InMemory extends InMemoryRepository<MeetingGroup, String> implements MeetingGroupRepository {
+    class InMemory extends InMemoryRepository<MeetingGroup, MeetingGroupId> implements MeetingGroupRepository {
 
-        InMemory(List<MeetingGroup> entities, Function<MeetingGroup, String> idGetter) {
+        InMemory(List<MeetingGroup> entities, Function<MeetingGroup, MeetingGroupId> idGetter) {
             super(entities, idGetter);
         }
 
@@ -27,10 +28,10 @@ interface MeetingGroupRepository extends Repository<MeetingGroup, String> {
         }
 
         @Override
-        public Collection<MeetingGroup> findByOrganizerId(UserId userId) {
+        public Collection<MeetingGroup> findByOrganizerId(GroupOrganizerId groupOrganizerId) {
             return entities
                     .stream()
-                    .filter(meetingGroup -> meetingGroup.getOrganizerId().equals(userId.getId()))
+                    .filter(meetingGroup -> meetingGroup.getGroupOrganizerId().equals(groupOrganizerId))
                     .toList();
         }
     }

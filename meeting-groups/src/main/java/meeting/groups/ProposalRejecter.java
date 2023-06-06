@@ -1,5 +1,6 @@
 package meeting.groups;
 
+import commons.dto.AdministratorId;
 import commons.dto.UserId;
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
@@ -17,17 +18,17 @@ class ProposalRejecter {
     private final ProposalRepository proposalRepository;
     private final AdministratorRepository administratorRepository;
 
-    Option<FailedToRejectProposal> rejectProposal(UserId userId, ProposalId proposalId) {
-        if (!userIsAdministrator(userId))
+    Option<FailedToRejectProposal> rejectProposal(AdministratorId administratorId, ProposalId proposalId) {
+        if (!isAdministrator(administratorId))
             return of(USER_IS_NOT_ADMINISTRATOR);
         return proposalRepository
-                .findById(proposalId.getId())
+                .findById(proposalId)
                 .toEither(PROPOSAL_WITH_GIVEN_ID_DOESNT_EXIST)
                 .map(Proposal::reject)
                 .fold(Option::of, Function.identity());
     }
 
-    private boolean userIsAdministrator(UserId userId) {
-        return administratorRepository.existsById(userId.getId());
+    private boolean isAdministrator(AdministratorId administratorId) {
+        return administratorRepository.existsById(administratorId);
     }
 }

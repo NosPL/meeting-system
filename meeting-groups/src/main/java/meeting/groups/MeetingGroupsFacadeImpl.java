@@ -1,7 +1,6 @@
 package meeting.groups;
 
-import commons.dto.MeetingGroupId;
-import commons.dto.UserId;
+import commons.dto.*;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
@@ -36,39 +35,39 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
     }
 
     @Override
-    public Option<JoinGroupFailure> joinGroup(UserId newMemberId, MeetingGroupId meetingGroupId) {
-        return groupJoiner.joinGroup(newMemberId, meetingGroupId);
+    public Option<JoinGroupFailure> joinGroup(UserId userId, MeetingGroupId meetingGroupId) {
+        return groupJoiner.joinGroup(userId, meetingGroupId);
     }
 
     @Override
-    public Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDraft proposalDraft) {
-        return proposalSubmitter.submitMeetingGroupProposal(userId, proposalDraft);
+    public Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft) {
+        return proposalSubmitter.submitMeetingGroupProposal(groupOrganizerId, proposalDraft);
     }
 
     @Override
-    public Either<ProposalAcceptanceRejected, MeetingGroupId> acceptProposal(UserId userId, ProposalId proposalId) {
-        return proposalAccepter.acceptProposal(userId, proposalId);
+    public Either<ProposalAcceptanceRejected, MeetingGroupId> acceptProposal(AdministratorId administratorId, ProposalId proposalId) {
+        return proposalAccepter.acceptProposal(administratorId, proposalId);
     }
 
     @Override
-    public Option<FailedToRejectProposal> rejectProposal(UserId userId, ProposalId proposalId) {
-        return proposalRejecter.rejectProposal(userId, proposalId);
+    public Option<FailedToRejectProposal> rejectProposal(AdministratorId administratorId, ProposalId proposalId) {
+        return proposalRejecter.rejectProposal(administratorId, proposalId);
     }
 
     @Override
-    public void addAdministrator(UserId administratorId) {
-        administratorRepository.save(new Administrator(administratorId.getId()));
+    public void addAdministrator(AdministratorId administratorId) {
+        administratorRepository.save(new Administrator(administratorId));
     }
 
     @Override
-    public void removeAdministrator(UserId administratorId) {
-        administratorRepository.removeById(administratorId.getId());
+    public void removeAdministrator(AdministratorId administratorId) {
+        administratorRepository.removeById(administratorId);
     }
 
     @Override
-    public List<ProposalDto> findAllProposalsByOrganizer(UserId userId) {
+    public List<ProposalDto> findAllProposalsOfGroupOrganizer(GroupOrganizerId groupOrganizerId) {
         return proposalRepository
-                .findByOrganizerId(userId)
+                .findByOrganizerId(groupOrganizerId)
                 .stream()
                 .map(Proposal::toDto)
                 .toList();
@@ -76,21 +75,21 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
 
     @Override
     public Option<MeetingGroupDetails> findMeetingGroupDetails(MeetingGroupId meetingGroupId) {
-        List<String> groupMembers = getGroupMembers(meetingGroupId);
+        var groupMembers = getGroupMembers(meetingGroupId);
         return meetingGroupRepository
-                .findById(meetingGroupId.getId())
+                .findById(meetingGroupId)
                 .map(meetingGroup -> toDto(meetingGroup, groupMembers));
     }
 
-    private List<String> getGroupMembers(MeetingGroupId meetingGroupId) {
+    private List<GroupMemberId> getGroupMembers(MeetingGroupId meetingGroupId) {
         return membershipRepository
-                .findByGroupId(meetingGroupId.getId())
+                .findByMeetingGroupId(meetingGroupId)
                 .stream()
-                .map(GroupMembership::getMemberId)
+                .map(GroupMembership::getGroupMemberId)
                 .toList();
     }
 
-    private MeetingGroupDetails toDto(MeetingGroup meetingGroup, List<String> groupMembers) {
-        return new MeetingGroupDetails(meetingGroup.getId(), meetingGroup.getName(), meetingGroup.getOrganizerId(), groupMembers);
+    private MeetingGroupDetails toDto(MeetingGroup meetingGroup, List<GroupMemberId> groupMembers) {
+        return new MeetingGroupDetails(meetingGroup.getMeetingGroupId(), meetingGroup.getName(), meetingGroup.getGroupOrganizerId(), groupMembers);
     }
 }

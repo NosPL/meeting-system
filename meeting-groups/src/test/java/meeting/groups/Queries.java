@@ -14,7 +14,7 @@ public class Queries extends TestSetup {
     @Before
     public void queriesSetup() {
         meetingGroupsFacade.subscriptionRenewed(userId());
-        meetingGroupsFacade.addAdministrator(userId());
+        meetingGroupsFacade.addAdministrator(administratorId());
     }
 
     @Test
@@ -22,7 +22,7 @@ public class Queries extends TestSetup {
 //        given that user submitted proposal
         var proposalDto = submitProposal();
 //        when user queries all proposals
-        var result = meetingGroupsFacade.findAllProposalsByOrganizer(userId());
+        var result = meetingGroupsFacade.findAllProposalsOfGroupOrganizer(groupOrganizerId());
 //        then he gets submitted proposal
         var expected = List.of(proposalDto);
         assertEquals(expected, result);
@@ -33,7 +33,7 @@ public class Queries extends TestSetup {
 //        given that proposal was accepted
         var proposalDto = submitAndAcceptProposal();
 //        when user queries all proposals
-        var result = meetingGroupsFacade.findAllProposalsByOrganizer(userId());
+        var result = meetingGroupsFacade.findAllProposalsOfGroupOrganizer(groupOrganizerId());
 //        then he gets proposal
         var expected = List.of(proposalDto);
         assertEquals(expected, result);
@@ -44,7 +44,7 @@ public class Queries extends TestSetup {
 //        given that proposal was rejected
         var proposalDto = submitAndRejectProposal();
 //        when user queries all proposals
-        var result = meetingGroupsFacade.findAllProposalsByOrganizer(userId());
+        var result = meetingGroupsFacade.findAllProposalsOfGroupOrganizer(groupOrganizerId());
 //        then he gets proposal
         var expected = List.of(proposalDto);
         assertEquals(expected, result);
@@ -56,13 +56,14 @@ public class Queries extends TestSetup {
         var proposalDraft = randomProposal();
         var meetingGroupId = createGroup(userId(), proposalDraft);
 //        and 3 users joined
-        var userId1 = joinGroup(meetingGroupId);
-        var userId2 = joinGroup(meetingGroupId);
-        var userId3 = joinGroup(meetingGroupId);
+        var groupMemberId1 = joinGroup(meetingGroupId);
+        var groupMemberId2 = joinGroup(meetingGroupId);
+        var groupMemberId3 = joinGroup(meetingGroupId);
 //        when user queries meeting group details with given id
         var result = meetingGroupsFacade.findMeetingGroupDetails(meetingGroupId);
 //        then he gets correct meeting group details
-        var expected = Option.of(meetingGroupDetails(meetingGroupId, proposalDraft, List.of(userId1.getId(), userId2.getId(), userId3.getId())));
+        var expectedGroupMembers = List.of(groupMemberId1, groupMemberId2, groupMemberId3);
+        var expected = Option.of(meetingGroupDetails(meetingGroupId, proposalDraft, expectedGroupMembers));
         assertEquals(expected, result);
     }
 }

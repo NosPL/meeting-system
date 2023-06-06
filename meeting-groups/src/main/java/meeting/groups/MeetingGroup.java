@@ -1,24 +1,30 @@
 package meeting.groups;
 
+import commons.dto.GroupOrganizerId;
+import commons.dto.MeetingGroupId;
 import commons.dto.UserId;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import meeting.groups.Proposal.ProposalAccepted;
 
 import java.util.UUID;
 
-@AllArgsConstructor
+import static lombok.AccessLevel.PRIVATE;
+
+@AllArgsConstructor(access = PRIVATE)
 @Getter
 class MeetingGroup {
-    private String id;
+    private MeetingGroupId meetingGroupId;
     private String name;
-    private String organizerId;
+    private GroupOrganizerId groupOrganizerId;
 
     static MeetingGroup createFromProposal(ProposalAccepted proposalAccepted) {
-        return new MeetingGroup(UUID.randomUUID().toString(), proposalAccepted.getGroupName(), proposalAccepted.getOrganizerId());
+        String id = UUID.randomUUID().toString();
+        return new MeetingGroup(new MeetingGroupId(id), proposalAccepted.getGroupName(), proposalAccepted.getGroupOrganizerId());
     }
 
     boolean isOrganizer(UserId userId) {
-        return organizerId.equals(userId.getId());
+        return groupOrganizerId.equals(new GroupOrganizerId(userId.getId()));
     }
 }

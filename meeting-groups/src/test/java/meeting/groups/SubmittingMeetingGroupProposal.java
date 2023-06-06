@@ -17,7 +17,7 @@ public class SubmittingMeetingGroupProposal extends TestSetup {
 //        and user has already created 3 groups
         create3randomGroupsForUser(userId());
 //        when user tries to submit proposal for the 4th group
-        var result = meetingGroupsFacade.submitMeetingGroupProposal(userId(), randomProposal());
+        var result = meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizerId(), randomProposal());
 //        then user fails because of groups per user limit got exceeded
         assertEquals(left(GROUP_LIMIT_PER_USER_EXCEEDED), result);
     }
@@ -30,7 +30,7 @@ public class SubmittingMeetingGroupProposal extends TestSetup {
         String nameUsedTwice = randomGroupName();
         createGroup(userId(), proposalWithName(nameUsedTwice));
 //        when user tries to submit proposal with the same name
-        var result = meetingGroupsFacade.submitMeetingGroupProposal(userId(), proposalWithName(nameUsedTwice));
+        var result = meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizerId(), proposalWithName(nameUsedTwice));
 //        then user fails because of groups per user limit got exceeded
         assertEquals(left(MEETING_GROUP_WITH_PROPOSED_NAME_ALREADY_EXISTS), result);
     }
@@ -41,9 +41,9 @@ public class SubmittingMeetingGroupProposal extends TestSetup {
         meetingGroupsFacade.subscriptionRenewed(userId());
 //        and proposal with given name is already submitted
         String nameUsedTwice = randomGroupName();
-        assert meetingGroupsFacade.submitMeetingGroupProposal(userId(), proposalWithName(nameUsedTwice)).isRight();
+        assert meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizerId(), proposalWithName(nameUsedTwice)).isRight();
 //        when user tries to submit proposal with occupied name
-        var result = meetingGroupsFacade.submitMeetingGroupProposal(userId(), proposalWithName(nameUsedTwice));
+        var result = meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizerId(), proposalWithName(nameUsedTwice));
 //        then user fails because of groups per user limit got exceeded
         assertEquals(left(PROPOSAL_WITH_THE_SAME_GROUP_NAME_ALREADY_EXISTS), result);
     }
@@ -53,7 +53,7 @@ public class SubmittingMeetingGroupProposal extends TestSetup {
 //        given that user has active subscription
         meetingGroupsFacade.subscriptionExpired(userId());
 //        when user tries to submit proposal
-        var result = meetingGroupsFacade.submitMeetingGroupProposal(userId(), randomProposal());
+        var result = meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizerId(), randomProposal());
 //        then user fails because of groups per user limit got exceeded
         assertEquals(left(SUBSCRIPTION_NOT_ACTIVE), result);
     }
@@ -63,7 +63,7 @@ public class SubmittingMeetingGroupProposal extends TestSetup {
 //        given that user has active subscription
         meetingGroupsFacade.subscriptionRenewed(userId());
 //        when user tries to submit proposal with occupied name
-        var result = meetingGroupsFacade.submitMeetingGroupProposal(userId(), randomProposal());
+        var result = meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizerId(), randomProposal());
 //        then user fails because of groups per user limit got exceeded
         assertTrue(result.isRight());
     }

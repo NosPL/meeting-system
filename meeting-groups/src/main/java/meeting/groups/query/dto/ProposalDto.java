@@ -1,11 +1,13 @@
 package meeting.groups.query.dto;
 
+import commons.dto.GroupOrganizerId;
 import lombok.Value;
+import meeting.groups.dto.ProposalId;
 
 @Value
 public class ProposalDto {
-    String id;
-    String organizerId;
+    ProposalId proposalId;
+    GroupOrganizerId groupOrganizerId;
     String groupName;
     State state;
 

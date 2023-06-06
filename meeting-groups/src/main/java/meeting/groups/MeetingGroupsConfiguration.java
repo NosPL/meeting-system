@@ -6,11 +6,11 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 public class MeetingGroupsConfiguration {
-    private final ProposalRepository.InMemory proposalRepositoryInMemory = new ProposalRepository.InMemory(new LinkedList<>(), Proposal::getId);
-    private final MeetingGroupRepository.InMemory meetingGroupRepositoryInMemory = new MeetingGroupRepository.InMemory(new LinkedList<>(), MeetingGroup::getId);
-    private final GroupMembershipRepository.InMemory groupMembershipRepositoryInMemory = new GroupMembershipRepository.InMemory(new LinkedList<>(), GroupMembership::getMemberId);
+    private final ProposalRepository.InMemory proposalRepositoryInMemory = new ProposalRepository.InMemory(new LinkedList<>(), Proposal::getProposalId);
+    private final MeetingGroupRepository.InMemory meetingGroupRepositoryInMemory = new MeetingGroupRepository.InMemory(new LinkedList<>(), MeetingGroup::getMeetingGroupId);
+    private final GroupMembershipRepository.InMemory groupMembershipRepositoryInMemory = new GroupMembershipRepository.InMemory(new LinkedList<>(), GroupMembership::getGroupMembershipId);
     private final ActiveUserSubscriptions activeUserSubscriptionsInMemory = new ActiveUserSubscriptions(new LinkedHashSet<>());
-    private final AdministratorRepository.InMemory administratorRepositoryInMemory = new AdministratorRepository.InMemory(new LinkedList<>(), Administrator::getId);
+    private final AdministratorRepository.InMemory administratorRepositoryInMemory = new AdministratorRepository.InMemory(new LinkedList<>(), Administrator::getAdministratorId);
 
     public MeetingGroupsFacade meetingGroupsFacade(
             ProposalRepository proposalRepository,

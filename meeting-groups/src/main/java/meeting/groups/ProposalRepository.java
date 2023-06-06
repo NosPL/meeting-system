@@ -1,21 +1,22 @@
 package meeting.groups;
 
-import commons.dto.UserId;
+import commons.dto.GroupOrganizerId;
 import commons.repository.InMemoryRepository;
 import commons.repository.Repository;
+import meeting.groups.dto.ProposalId;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-interface ProposalRepository extends Repository<Proposal, String> {
+interface ProposalRepository extends Repository<Proposal, ProposalId> {
     boolean existsByGroupName(String groupName);
 
-    Collection<Proposal> findByOrganizerId(UserId userId);
+    Collection<Proposal> findByOrganizerId(GroupOrganizerId groupOrganizerId);
 
-    class InMemory extends InMemoryRepository<Proposal, String> implements ProposalRepository {
+    class InMemory extends InMemoryRepository<Proposal, ProposalId> implements ProposalRepository {
 
-        InMemory(List<Proposal> entities, Function<Proposal, String> idGetter) {
+        InMemory(List<Proposal> entities, Function<Proposal, ProposalId> idGetter) {
             super(entities, idGetter);
         }
 
@@ -27,10 +28,10 @@ interface ProposalRepository extends Repository<Proposal, String> {
         }
 
         @Override
-        public Collection<Proposal> findByOrganizerId(UserId userId) {
+        public Collection<Proposal> findByOrganizerId(GroupOrganizerId groupOrganizerId) {
             return entities
                     .stream()
-                    .filter(meetingGroup -> meetingGroup.getOrganizerId().equals(userId.getId()))
+                    .filter(meetingGroup -> meetingGroup.getGroupOrganizerId().equals(groupOrganizerId))
                     .toList();
         }
     }

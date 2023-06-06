@@ -1,7 +1,8 @@
 package meeting.groups.commons;
 
+import commons.dto.GroupMemberId;
+import commons.dto.GroupOrganizerId;
 import commons.dto.MeetingGroupId;
-import commons.dto.OrganizerId;
 import commons.dto.UserId;
 import commons.event.publisher.EventPublisher;
 import io.vavr.Tuple;
@@ -13,26 +14,26 @@ import java.util.List;
 
 @Slf4j
 public class EventPublisherMock implements EventPublisher {
-    private final LinkedList<Tuple2<UserId, MeetingGroupId>> groupCreatedInvocations = new LinkedList<>();
-    private final LinkedList<Tuple2<UserId, MeetingGroupId>> memberJoinedGroupInvocations = new LinkedList<>();
+    private final LinkedList<Tuple2<GroupOrganizerId, MeetingGroupId>> groupCreatedInvocations = new LinkedList<>();
+    private final LinkedList<Tuple2<GroupMemberId, MeetingGroupId>> memberJoinedGroupInvocations = new LinkedList<>();
 
     @Override
-    public void newMeetingGroupCreated(UserId userId, MeetingGroupId meetingGroupId) {
+    public void newMeetingGroupCreated(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId) {
         log.info("'new meeting group created' event was emitted, meeting group id {}", meetingGroupId.getId());
-        groupCreatedInvocations.addLast(Tuple.of(userId, meetingGroupId));
+        groupCreatedInvocations.addLast(Tuple.of(groupOrganizerId, meetingGroupId));
     }
 
     @Override
-    public void newMemberJoinedMeetingGroup(UserId userId, MeetingGroupId meetingGroupId) {
-        log.info("'new member joined group' event was emitted, user id {}, meeting group id {}", userId.getId(), meetingGroupId.getId());
-        memberJoinedGroupInvocations.addLast(Tuple.of(userId, meetingGroupId));
+    public void newMemberJoinedMeetingGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
+        log.info("'new member joined group' event was emitted, group member id {}, meeting group id {}", groupMemberId.getId(), meetingGroupId.getId());
+        memberJoinedGroupInvocations.addLast(Tuple.of(groupMemberId, meetingGroupId));
     }
 
-    public boolean groupCreatedEventInvoked(List<Tuple2<UserId, MeetingGroupId>> invocations) {
+    public boolean groupCreatedEventInvoked(List<Tuple2<GroupOrganizerId, MeetingGroupId>> invocations) {
         return groupCreatedInvocations.equals(invocations);
     }
 
-    public boolean newMemberJoinedGroupEventInvoked(List<Tuple2<UserId, MeetingGroupId>> invocations) {
+    public boolean newMemberJoinedGroupEventInvoked(List<Tuple2<GroupMemberId, MeetingGroupId>> invocations) {
         return memberJoinedGroupInvocations.equals(invocations);
     }
 }

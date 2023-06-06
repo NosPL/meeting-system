@@ -1,7 +1,6 @@
 package meeting.groups.commons;
 
-import commons.dto.MeetingGroupId;
-import commons.dto.UserId;
+import commons.dto.*;
 import meeting.groups.MeetingGroupsFacade;
 import meeting.groups.MeetingGroupsConfiguration;
 import meeting.groups.dto.ProposalDraft;
@@ -25,6 +24,10 @@ public class TestSetup {
         userId = new UserId("user-id");
         eventPublisherMock = new EventPublisherMock();
         meetingGroupsFacade = new MeetingGroupsConfiguration().inMemoryMeetingGroupsFacade(eventPublisherMock);
+    }
+
+    protected AdministratorId administratorId() {
+        return new AdministratorId(userId().getId());
     }
 
     protected void create3randomGroupsForUser(UserId userId) {
@@ -72,38 +75,48 @@ public class TestSetup {
         return new ProposalId(UUID.randomUUID().toString());
     }
 
-    protected MeetingGroupDetails meetingGroupDetails(MeetingGroupId meetingGroupId, ProposalDraft proposalDraft, List<String> groupMembers) {
-        return new MeetingGroupDetails(meetingGroupId.getId(), proposalDraft.getGroupName(), userId().getId(), groupMembers);
+    protected MeetingGroupDetails meetingGroupDetails(MeetingGroupId meetingGroupId, ProposalDraft proposalDraft, List<GroupMemberId> groupMembers) {
+        var groupOrganizerId = new GroupOrganizerId(userId().getId());
+        return new MeetingGroupDetails(meetingGroupId, proposalDraft.getGroupName(), groupOrganizerId, groupMembers);
     }
 
-    protected UserId joinGroup(MeetingGroupId meetingGroupId) {
+    protected GroupMemberId joinGroup(MeetingGroupId meetingGroupId) {
         var userId = new UserId(UUID.randomUUID().toString());
         meetingGroupsFacade.subscriptionRenewed(userId);
         assert meetingGroupsFacade.joinGroup(userId, meetingGroupId).isEmpty();
-        return userId;
+        return new GroupMemberId(userId.getId());
     }
 
     protected ProposalDto submitProposal() {
         var proposalDraft = randomProposal();
-        var proposalId = meetingGroupsFacade.submitMeetingGroupProposal(userId(), proposalDraft).get();
-        return new ProposalDto(proposalId.getId(), userId().getId(), proposalDraft.getGroupName(), WAITING);
+        var groupOrganizerId = new GroupOrganizerId(userId().getId());
+        var proposalId = meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizerId, proposalDraft).get();
+        return new ProposalDto(proposalId, groupOrganizerId, proposalDraft.getGroupName(), WAITING);
     }
 
     protected ProposalDto submitAndAcceptProposal() {
         var proposalDraft = randomProposal();
-        var proposalId = meetingGroupsFacade.submitMeetingGroupProposal(userId(), proposalDraft).get();
-        meetingGroupsFacade.acceptProposal(userId(), proposalId).get();
-        return new ProposalDto(proposalId.getId(), userId().getId(), proposalDraft.getGroupName(), ACCEPTED);
+        var groupOrganizerId = new GroupOrganizerId(userId().getId());
+        var proposalId = meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizerId, proposalDraft).get();
+        var administratorId = new AdministratorId(userId().getId());
+        meetingGroupsFacade.acceptProposal(administratorId, proposalId).get();
+        return new ProposalDto(proposalId, groupOrganizerId, proposalDraft.getGroupName(), ACCEPTED);
     }
 
     protected ProposalDto submitAndRejectProposal() {
         var proposalDraft = randomProposal();
-        var proposalId = meetingGroupsFacade.submitMeetingGroupProposal(userId(), proposalDraft).get();
-        meetingGroupsFacade.rejectProposal(userId(), proposalId);
-        return new ProposalDto(proposalId.getId(), userId().getId(), proposalDraft.getGroupName(), REJECTED);
+        var groupOrganizerId = new GroupOrganizerId(userId().getId());
+        var proposalId = meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizerId, proposalDraft).get();
+        var administratorId = new AdministratorId(userId().getId());
+        meetingGroupsFacade.rejectProposal(administratorId, proposalId);
+        return new ProposalDto(proposalId, groupOrganizerId, proposalDraft.getGroupName(), REJECTED);
     }
 
-    protected UserId randomUserId() {
-        return new UserId(UUID.randomUUID().toString());
+    protected GroupOrganizerId groupOrganizerId() {
+        return new GroupOrganizerId(userId().getId());
+    }
+
+    protected GroupMemberId groupMemberId() {
+        return new GroupMemberId(userId().getId());
     }
 }

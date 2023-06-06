@@ -1,40 +1,43 @@
 package meeting.groups;
 
+import commons.dto.GroupMemberId;
+import commons.dto.MeetingGroupId;
 import commons.repository.InMemoryRepository;
 import commons.repository.Repository;
 import io.vavr.control.Option;
+import commons.dto.GroupMembershipId;
 
 import java.util.List;
 import java.util.function.Function;
 
-interface GroupMembershipRepository extends Repository<GroupMembership, String> {
+interface GroupMembershipRepository extends Repository<GroupMembership, GroupMembershipId> {
 
-    Option<GroupMembership> findByMemberIdAndGroupId(String memberId, String groupId);
+    Option<GroupMembership> findByGroupMemberIdAndMeetingGroupId(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId);
 
-    List<GroupMembership> findByGroupId(String groupId);
+    List<GroupMembership> findByMeetingGroupId(MeetingGroupId meetingGroupId);
 
-    class InMemory extends InMemoryRepository<GroupMembership, String> implements GroupMembershipRepository {
+    class InMemory extends InMemoryRepository<GroupMembership, GroupMembershipId> implements GroupMembershipRepository {
 
-        InMemory(List<GroupMembership> entities, Function<GroupMembership, String> idGetter) {
+        InMemory(List<GroupMembership> entities, Function<GroupMembership, GroupMembershipId> idGetter) {
             super(entities, idGetter);
         }
 
         @Override
-        public Option<GroupMembership> findByMemberIdAndGroupId(String memberId, String groupId) {
+        public Option<GroupMembership> findByGroupMemberIdAndMeetingGroupId(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
             return entities
                     .stream()
-                    .filter(groupMembership -> groupMembership.getMemberId().equals(memberId))
-                    .filter(groupMembership -> groupMembership.getMeetingGroupId().equals(groupId))
+                    .filter(groupMembership -> groupMembership.getGroupMemberId().equals(groupMemberId))
+                    .filter(groupMembership -> groupMembership.getMeetingGroupId().equals(meetingGroupId))
                     .findAny()
                     .map(Option::of)
                     .orElse(Option.none());
         }
 
         @Override
-        public List<GroupMembership> findByGroupId(String groupId) {
+        public List<GroupMembership> findByMeetingGroupId(MeetingGroupId meetingGroupId) {
             return entities
                     .stream()
-                    .filter(groupMembership -> groupMembership.getMeetingGroupId().equals(groupId))
+                    .filter(groupMembership -> groupMembership.getMeetingGroupId().equals(meetingGroupId))
                     .toList();
         }
     }

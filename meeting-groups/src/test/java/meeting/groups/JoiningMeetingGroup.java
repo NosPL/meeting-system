@@ -1,6 +1,6 @@
 package meeting.groups;
 
-import io.vavr.Tuple;
+import commons.dto.GroupMemberId;
 import io.vavr.control.Option;
 import meeting.groups.commons.TestSetup;
 import org.junit.Test;
@@ -64,7 +64,7 @@ public class JoiningMeetingGroup extends TestSetup {
         assert meetingGroupsFacade.joinGroup(userId(), meetingGroupId2).isEmpty();
         assert meetingGroupsFacade.joinGroup(userId(), meetingGroupId3).isEmpty();
 //        and 'new member joined meeting group' event should be emitted 3 times
-        var expectedInvocations = List.of(of(userId(), meetingGroupId1), of(userId(), meetingGroupId2), of(userId(), meetingGroupId3));
+        var expectedInvocations = List.of(of(groupMemberId(), meetingGroupId1), of(groupMemberId(), meetingGroupId2), of(groupMemberId(), meetingGroupId3));
         assert eventPublisherMock.newMemberJoinedGroupEventInvoked(expectedInvocations);
     }
 }

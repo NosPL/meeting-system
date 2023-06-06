@@ -1,7 +1,7 @@
 package meeting.groups;
 
 
-import commons.dto.UserId;
+import commons.dto.GroupOrganizerId;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
@@ -10,6 +10,7 @@ import lombok.Value;
 import meeting.groups.dto.FailedToRejectProposal;
 import meeting.groups.dto.ProposalAcceptanceRejected;
 import meeting.groups.dto.ProposalDraft;
+import meeting.groups.dto.ProposalId;
 import meeting.groups.query.dto.ProposalDto;
 
 import java.util.UUID;
@@ -26,8 +27,8 @@ import static meeting.groups.dto.ProposalAcceptanceRejected.PROPOSAL_WAS_ALREADY
 @AllArgsConstructor(access = PRIVATE)
 @Getter
 class Proposal {
-    private String id;
-    private String organizerId;
+    private ProposalId proposalId;
+    private GroupOrganizerId groupOrganizerId;
     private String groupName;
     private State state;
 
@@ -37,7 +38,7 @@ class Proposal {
         if (state == State.PROPOSAL_REJECTED)
             return left(PROPOSAL_WAS_ALREADY_REJECTED);
         this.state = State.PROPOSAL_ACCEPTED;
-        return right(new ProposalAccepted(id, organizerId, groupName));
+        return right(new ProposalAccepted(proposalId, groupOrganizerId, groupName));
     }
 
     Option<FailedToRejectProposal> reject() {
@@ -50,7 +51,7 @@ class Proposal {
     }
 
     ProposalDto toDto() {
-        return new ProposalDto(id, organizerId, groupName, toDto(state));
+        return new ProposalDto(proposalId, groupOrganizerId, groupName, toDto(state));
     }
 
     private ProposalDto.State toDto(State state) {
@@ -66,8 +67,9 @@ class Proposal {
         return state == State.WAITING_FOR_ADMIN_DECISION;
     }
 
-    static Proposal createFrom(UserId userId, ProposalDraft proposalDraft) {
-        return new Proposal(UUID.randomUUID().toString(), userId.getId(), proposalDraft.getGroupName(), State.WAITING_FOR_ADMIN_DECISION);
+    static Proposal createFrom(GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft) {
+        String id = UUID.randomUUID().toString();
+        return new Proposal(new ProposalId(id), groupOrganizerId, proposalDraft.getGroupName(), State.WAITING_FOR_ADMIN_DECISION);
     }
 
     private enum State {
@@ -78,8 +80,8 @@ class Proposal {
 
     @Value
     static class ProposalAccepted {
-        String id;
-        String organizerId;
+        ProposalId proposalId;
+        GroupOrganizerId groupOrganizerId;
         String groupName;
     }
 }

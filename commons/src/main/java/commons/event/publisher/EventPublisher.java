@@ -1,11 +1,12 @@
 package commons.event.publisher;
 
+import commons.dto.GroupMemberId;
+import commons.dto.GroupOrganizerId;
 import commons.dto.MeetingGroupId;
-import commons.dto.UserId;
 
 public interface EventPublisher {
 
-    void newMeetingGroupCreated(UserId userId, MeetingGroupId meetingGroupId);
+    void newMeetingGroupCreated(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId);
 
-    void newMemberJoinedMeetingGroup(UserId userId, MeetingGroupId meetingGroupId);
+    void newMemberJoinedMeetingGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId);
 }

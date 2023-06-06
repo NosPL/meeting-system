@@ -1,7 +1,6 @@
 package meeting.groups;
 
-import commons.dto.MeetingGroupId;
-import commons.dto.UserId;
+import commons.dto.*;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import meeting.groups.dto.*;
@@ -18,17 +17,17 @@ public interface MeetingGroupsFacade {
 
     Option<JoinGroupFailure> joinGroup(UserId userId, MeetingGroupId meetingGroupId);
 
-    Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(UserId userId, ProposalDraft proposalDraft);
+    Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft);
 
-    Either<ProposalAcceptanceRejected, MeetingGroupId> acceptProposal(UserId userId, ProposalId proposalId);
+    Either<ProposalAcceptanceRejected, MeetingGroupId> acceptProposal(AdministratorId administratorId, ProposalId proposalId);
 
-    Option<FailedToRejectProposal> rejectProposal(UserId userId, ProposalId proposalId);
+    Option<FailedToRejectProposal> rejectProposal(AdministratorId administratorId, ProposalId proposalId);
 
-    void addAdministrator(UserId administratorId);
+    void addAdministrator(AdministratorId administratorId);
 
-    void removeAdministrator(UserId administratorId);
+    void removeAdministrator(AdministratorId administratorId);
 
-    List<ProposalDto> findAllProposalsByOrganizer(UserId userId);
+    List<ProposalDto> findAllProposalsOfGroupOrganizer(GroupOrganizerId groupOrganizerId);
 
     Option<MeetingGroupDetails> findMeetingGroupDetails(MeetingGroupId meetingGroupId);
 }

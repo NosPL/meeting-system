@@ -1,5 +1,6 @@
 package meeting.groups;
 
+import commons.dto.GroupOrganizerId;
 import commons.dto.UserId;
 import lombok.AllArgsConstructor;
 
@@ -19,5 +20,9 @@ class ActiveUserSubscriptions {
 
     public void remove(UserId userId) {
         userIds.remove(userId);
+    }
+
+    public boolean contains(GroupOrganizerId groupOrganizerId) {
+        return userIds.contains(new UserId(groupOrganizerId.getId()));
     }
 }
