@@ -17,18 +17,6 @@ class LogsDecorator implements MeetingsFacade {
     private final MeetingsFacade meetingsFacade;
 
     @Override
-    public void subscriptionRenewed(UserId userId) {
-        meetingsFacade.subscriptionRenewed(userId);
-        log.info("subscription renewed, user id {}", userId.getId());
-    }
-
-    @Override
-    public void subscriptionExpired(UserId userId) {
-        meetingsFacade.subscriptionExpired(userId);
-        log.info("subscription expired, user id {}", userId.getId());
-    }
-
-    @Override
     public void newMeetingGroupCreated(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId) {
         meetingsFacade.newMeetingGroupCreated(groupOrganizerId, meetingGroupId);
         log.info("new meeting group created, group organizer id {}, meeting group id {}", groupOrganizerId.getId(), meetingGroupId.getId());

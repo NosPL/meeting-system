@@ -1,5 +1,6 @@
 package meetings.commons;
 
+import commons.active.subscribers.InMemoryActiveSubscribers;
 import commons.calendar.Calendar;
 import commons.dto.GroupMemberId;
 import commons.dto.GroupOrganizerId;
@@ -15,21 +16,23 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public class TestSetup {
+    protected InMemoryActiveSubscribers activeSubscribers;
     protected MeetingsFacade meetingsFacade;
     protected Calendar calendar;
 
     @Before
     public void testSetup() {
+        activeSubscribers = new InMemoryActiveSubscribers();
         calendar = new FixedDateCalendar(LocalDate.now());
-        meetingsFacade = new MeetingsConfiguration().inMemoryMeetingsFacade(calendar);
+        meetingsFacade = new MeetingsConfiguration().inMemoryMeetingsFacade(activeSubscribers, calendar);
     }
 
     protected void subscriptionRenewed(GroupMeetingHostId groupMeetingHostId) {
-        meetingsFacade.subscriptionRenewed(new UserId(groupMeetingHostId.getId()));
+        activeSubscribers.add(new UserId(groupMeetingHostId.getId()));
     }
 
     protected void subscriptionRenewed(GroupOrganizerId groupOrganizerId) {
-        meetingsFacade.subscriptionRenewed(new UserId(groupOrganizerId.getId()));
+        activeSubscribers.add(new UserId(groupOrganizerId.getId()));
     }
 
     protected void newMemberJoinedGroup(GroupMeetingHostId groupMeetingHostId, MeetingGroupId meetingGroupId) {
@@ -37,11 +40,11 @@ public class TestSetup {
     }
 
     protected void subscriptionExpired(GroupOrganizerId groupOrganizerId) {
-        meetingsFacade.subscriptionExpired(new UserId(groupOrganizerId.getId()));
+        activeSubscribers.remove(new UserId(groupOrganizerId.getId()));
     }
 
     protected void subscriptionExpired(GroupMeetingHostId groupMeetingHostId) {
-        meetingsFacade.subscriptionExpired(new UserId(groupMeetingHostId.getId()));
+        activeSubscribers.remove(new UserId(groupMeetingHostId.getId()));
     }
 
     protected GroupMeetingName uniqueNotBlankMeetingName() {

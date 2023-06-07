@@ -1,5 +1,6 @@
 package meetings;
 
+import commons.active.subscribers.ActiveSubscribersFinder;
 import commons.dto.GroupMemberId;
 import commons.dto.GroupOrganizerId;
 import commons.dto.MeetingGroupId;
@@ -15,18 +16,7 @@ import java.util.HashSet;
 @AllArgsConstructor
 class MeetingsFacadeImpl implements MeetingsFacade {
     private final MeetingGroupRepository meetingGroupRepository;
-    private final ActiveSubscriptions activeSubscriptions;
     private final MeetingsScheduler meetingsScheduler;
-
-    @Override
-    public void subscriptionRenewed(UserId userId) {
-        activeSubscriptions.add(userId);
-    }
-
-    @Override
-    public void subscriptionExpired(UserId userId) {
-        activeSubscriptions.remove(userId);
-    }
 
     @Override
     public void newMeetingGroupCreated(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId) {

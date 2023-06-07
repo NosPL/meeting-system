@@ -1,5 +1,6 @@
 package meetings;
 
+import commons.active.subscribers.ActiveSubscribersFinder;
 import commons.calendar.Calendar;
 import commons.dto.GroupMemberId;
 import commons.dto.GroupOrganizerId;
@@ -17,7 +18,7 @@ import static meetings.dto.ScheduleMeetingFailure.*;
 
 @AllArgsConstructor
 class MeetingsScheduler {
-    private final ActiveSubscriptions activeSubscriptions;
+    private final ActiveSubscribersFinder activeSubscribersFinder;
     private final MeetingRepository meetingRepository;
     private final MeetingGroupRepository meetingGroupRepository;
     private final Calendar calendar;
@@ -56,7 +57,7 @@ class MeetingsScheduler {
     }
 
     private boolean isSubscribed(GroupOrganizerId groupOrganizerId) {
-        return activeSubscriptions.contains(new UserId(groupOrganizerId.getId()));
+        return activeSubscribersFinder.contains(new UserId(groupOrganizerId.getId()));
     }
 
     private boolean meetingNameIsAlreadyUsed(GroupMeetingName groupMeetingName) {
@@ -76,7 +77,7 @@ class MeetingsScheduler {
     }
 
     private boolean isSubscribed(GroupMeetingHostId groupMeetingHostId) {
-        return activeSubscriptions.contains(new UserId(groupMeetingHostId.getId()));
+        return activeSubscribersFinder.contains(new UserId(groupMeetingHostId.getId()));
     }
 
     private boolean dateIs3DaysInAdvance(LocalDate meetingDate) {
