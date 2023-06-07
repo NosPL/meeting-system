@@ -1,6 +1,8 @@
 package meeting.groups;
 
+import commons.active.subscribers.ActiveSubscribersFinder;
 import commons.dto.GroupOrganizerId;
+import commons.dto.UserId;
 import io.vavr.control.Either;
 import lombok.AllArgsConstructor;
 import meeting.groups.dto.ProposalDraft;
@@ -17,10 +19,10 @@ class ProposalSubmitter {
     private static final int GROUPS_PER_USER_LIMIT = 3;
     private final ProposalRepository proposalRepository;
     private final MeetingGroupRepository meetingGroupRepository;
-    private final ActiveSubscriptions activeSubscriptions;
+    private final ActiveSubscribersFinder activeSubscribersFinder;
 
     Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft) {
-        if (!activeSubscriptions.contains(groupOrganizerId))
+        if (!organizerIsSubscribed(groupOrganizerId))
             return left(SUBSCRIPTION_NOT_ACTIVE);
         if (meetingGroupsPerUserLimitExceeded(groupOrganizerId))
             return left(GROUP_LIMIT_PER_USER_EXCEEDED);
@@ -30,6 +32,10 @@ class ProposalSubmitter {
             return left(PROPOSAL_WITH_THE_SAME_GROUP_NAME_ALREADY_EXISTS);
         var proposal = Proposal.createFrom(groupOrganizerId, proposalDraft);
         return right(proposalRepository.save(proposal));
+    }
+
+    private boolean organizerIsSubscribed(GroupOrganizerId groupOrganizerId) {
+        return activeSubscribersFinder.contains(new UserId(groupOrganizerId.getId()));
     }
 
     private boolean meetingGroupsPerUserLimitExceeded(GroupOrganizerId groupOrganizerId) {

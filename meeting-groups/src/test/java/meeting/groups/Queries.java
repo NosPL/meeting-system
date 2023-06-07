@@ -90,7 +90,7 @@ public class Queries extends TestSetup {
 
     private GroupMemberId joinGroup(MeetingGroupId meetingGroupId) {
         var userId = new UserId(UUID.randomUUID().toString());
-        meetingGroupsFacade.subscriptionRenewed(userId);
+        activeSubscribers.add(userId);
         assert meetingGroupsFacade.joinGroup(userId, meetingGroupId).isEmpty();
         return new GroupMemberId(userId.getId());
     }

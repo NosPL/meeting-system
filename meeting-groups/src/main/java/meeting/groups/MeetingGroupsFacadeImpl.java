@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
-    private final ActiveSubscriptions activeSubscriptions;
     private final AdministratorRepository administratorRepository;
     private final ProposalRepository proposalRepository;
     private final MeetingGroupRepository meetingGroupRepository;
@@ -23,16 +22,6 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
     private final ProposalAccepter proposalAccepter;
     private final ProposalRejecter proposalRejecter;
     private final GroupJoiner groupJoiner;
-
-    @Override
-    public void subscriptionRenewed(UserId userId) {
-        activeSubscriptions.add(userId);
-    }
-
-    @Override
-    public void subscriptionExpired(UserId userId) {
-        activeSubscriptions.remove(userId);
-    }
 
     @Override
     public Option<JoinGroupFailure> joinGroup(UserId userId, MeetingGroupId meetingGroupId) {

@@ -1,8 +1,12 @@
 package meeting.groups.commons;
 
-import commons.dto.*;
-import meeting.groups.MeetingGroupsFacade;
+import commons.active.subscribers.InMemoryActiveSubscribers;
+import commons.dto.AdministratorId;
+import commons.dto.GroupOrganizerId;
+import commons.dto.MeetingGroupId;
+import commons.dto.UserId;
 import meeting.groups.MeetingGroupsConfiguration;
+import meeting.groups.MeetingGroupsFacade;
 import meeting.groups.dto.ProposalDraft;
 import meeting.groups.dto.ProposalId;
 import org.junit.Before;
@@ -15,15 +19,17 @@ public class TestSetup {
     protected final GroupOrganizerId subscribedGroupOrganizer = new GroupOrganizerId("subscribed-group-organizer");
     protected final AdministratorId administrator = new AdministratorId("administrator");
     protected final AdministratorId notAdministrator = new AdministratorId("not-administrator");
+    protected InMemoryActiveSubscribers activeSubscribers;
     protected EventPublisherMock eventPublisherMock;
     protected MeetingGroupsFacade meetingGroupsFacade;
 
     @Before
     public void setup() {
+        activeSubscribers = new InMemoryActiveSubscribers();
         eventPublisherMock = new EventPublisherMock();
-        meetingGroupsFacade = new MeetingGroupsConfiguration().inMemoryMeetingGroupsFacade(eventPublisherMock);
-        meetingGroupsFacade.subscriptionRenewed(subscribedUser);
-        meetingGroupsFacade.subscriptionRenewed(new UserId(subscribedGroupOrganizer.getId()));
+        meetingGroupsFacade = new MeetingGroupsConfiguration().inMemoryMeetingGroupsFacade(activeSubscribers, eventPublisherMock);
+        activeSubscribers.add(subscribedUser);
+        activeSubscribers.add(new UserId(subscribedGroupOrganizer.getId()));
         meetingGroupsFacade.addAdministrator(administrator);
     }
 

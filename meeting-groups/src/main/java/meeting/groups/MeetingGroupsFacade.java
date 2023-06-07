@@ -11,10 +11,6 @@ import java.util.List;
 
 public interface MeetingGroupsFacade {
 
-    void subscriptionRenewed(UserId userId);
-
-    void subscriptionExpired(UserId userId);
-
     Option<JoinGroupFailure> joinGroup(UserId userId, MeetingGroupId meetingGroupId);
 
     Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft);
