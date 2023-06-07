@@ -13,9 +13,7 @@ import meeting.groups.query.dto.ProposalDto;
 import meeting.groups.query.dto.ProposalDto.State;
 import org.junit.Test;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static meeting.groups.query.dto.ProposalDto.State.*;
@@ -76,8 +74,8 @@ public class Queries extends TestSetup {
         assertEquals(Option.of(expected), result);
     }
 
-    private List<GroupMemberId> _3usersJoined(MeetingGroupId meetingGroupId) {
-        List<GroupMemberId> groupMembers = new LinkedList<>();
+    private Set<GroupMemberId> _3usersJoined(MeetingGroupId meetingGroupId) {
+        Set<GroupMemberId> groupMembers = new HashSet<>();
         for (int i = 0; i < 3; i++) {
             groupMembers.add(joinGroup(meetingGroupId));
         }

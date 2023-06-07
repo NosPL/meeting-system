@@ -43,7 +43,7 @@ class MeetingGroup {
     }
 
     MeetingGroupDetails toDto() {
-        return new MeetingGroupDetails(meetingGroupId, name, groupOrganizerId, groupMemberIds.stream().toList());
+        return new MeetingGroupDetails(meetingGroupId, name, groupOrganizerId, new HashSet<>(groupMemberIds));
     }
 
     static MeetingGroup createFromProposal(ProposalAccepted proposalAccepted) {
