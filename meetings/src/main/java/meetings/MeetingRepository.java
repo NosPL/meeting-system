@@ -2,7 +2,7 @@ package meetings;
 
 import commons.repository.InMemoryRepository;
 import commons.repository.Repository;
-import meetings.dto.GroupMeetingId;
+import commons.dto.GroupMeetingId;
 import meetings.dto.GroupMeetingName;
 
 import java.util.List;

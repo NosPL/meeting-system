@@ -2,18 +2,13 @@ package meetings.scheduling.meetings;
 
 import commons.dto.GroupOrganizerId;
 import commons.dto.MeetingGroupId;
-import commons.dto.UserId;
-import meetings.MeetingsConfiguration;
-import meetings.commons.FixedDateCalendar;
+import io.vavr.control.Option;
 import meetings.commons.TestSetup;
 import meetings.dto.GroupMeetingHostId;
-import meetings.dto.GroupMeetingName;
 import meetings.dto.MeetingDraft;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.time.LocalDate;
-import java.util.UUID;
+import static org.mockito.Mockito.verify;
 
 public class ScheduleNewMeetingHappyPath extends TestSetup {
     protected final MeetingGroupId meetingGroupId = new MeetingGroupId("meeting-group-id");
@@ -35,9 +30,12 @@ public class ScheduleNewMeetingHappyPath extends TestSetup {
 //        and meeting name is unique and not blank
         var groupMeetingName = uniqueNotBlankMeetingName();
 //        when group organizer tries to schedule new meeting
-        var meetingDraft = new MeetingDraft(meetingGroupId, date3DaysFromNow, groupMeetingHostId, groupMeetingName);
+        var meetingDraft = new MeetingDraft(meetingGroupId, date3DaysFromNow, groupMeetingHostId, groupMeetingName, Option.none());
         var result = meetingsFacade.scheduleNewMeeting(groupOrganizerId, meetingDraft);
 //        then he succeeds
         assert result.isRight();
+//        and even was emitted
+        var groupMeetingId = result.get();
+        verify(eventPublisher).newMeetingWasScheduled(meetingGroupId, groupMeetingId);
     }
 }

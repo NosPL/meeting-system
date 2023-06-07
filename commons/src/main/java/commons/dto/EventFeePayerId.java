@@ -3,6 +3,6 @@ package commons.dto;
 import lombok.Value;
 
 @Value
-public class GroupMembershipId {
+public class EventFeePayerId {
     String id;
 }

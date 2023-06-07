@@ -2,6 +2,7 @@ package meetings.scheduling.meetings;
 
 import commons.dto.GroupOrganizerId;
 import commons.dto.MeetingGroupId;
+import io.vavr.control.Option;
 import meetings.commons.TestSetup;
 import meetings.dto.GroupMeetingHostId;
 import meetings.dto.GroupMeetingName;
@@ -104,19 +105,19 @@ public class ScheduleNewMeetingFailingPaths extends TestSetup {
     }
 
     private MeetingDraft correctMeetingDraft(MeetingGroupId meetingGroupId) {
-        return new MeetingDraft(meetingGroupId, date3DaysFromNow(), hostThatIsGroupMember, uniqueNotBlankMeetingName());
+        return new MeetingDraft(meetingGroupId, date3DaysFromNow(), hostThatIsGroupMember, uniqueNotBlankMeetingName(), Option.none());
     }
 
     private MeetingDraft correctMeetingDraft(LocalDate meetingDate) {
-        return new MeetingDraft(existingMeetingGroup, meetingDate, hostThatIsGroupMember, uniqueNotBlankMeetingName());
+        return new MeetingDraft(existingMeetingGroup, meetingDate, hostThatIsGroupMember, uniqueNotBlankMeetingName(), Option.none());
     }
 
     private MeetingDraft correctMeetingDraft(GroupMeetingHostId groupMeetingHostId) {
-        return new MeetingDraft(existingMeetingGroup, date3DaysFromNow(), groupMeetingHostId, uniqueNotBlankMeetingName());
+        return new MeetingDraft(existingMeetingGroup, date3DaysFromNow(), groupMeetingHostId, uniqueNotBlankMeetingName(), Option.none());
     }
 
     private MeetingDraft correctMeetingDraft(GroupMeetingName groupMeetingName) {
-        return new MeetingDraft(existingMeetingGroup, date3DaysFromNow(), hostThatIsGroupMember, groupMeetingName);
+        return new MeetingDraft(existingMeetingGroup, date3DaysFromNow(), hostThatIsGroupMember, groupMeetingName, Option.none());
     }
 
     private MeetingDraft correctMeetingDraft() {
@@ -124,7 +125,8 @@ public class ScheduleNewMeetingFailingPaths extends TestSetup {
                 existingMeetingGroup,
                 date3DaysFromNow(),
                 hostThatIsGroupMember,
-                uniqueNotBlankMeetingName());
+                uniqueNotBlankMeetingName(),
+                Option.none());
     }
 
     private LocalDate date3DaysFromNow() {

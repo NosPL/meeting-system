@@ -1,8 +1,6 @@
 package commons.event.publisher;
 
-import commons.dto.GroupMemberId;
-import commons.dto.GroupOrganizerId;
-import commons.dto.MeetingGroupId;
+import commons.dto.*;
 
 public interface EventPublisher {
 
@@ -13,4 +11,11 @@ public interface EventPublisher {
     void meetingGroupWasRemoved(MeetingGroupId meetingGroupId);
 
     void groupMemberLeftGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId);
+
+    void newMeetingWasScheduled(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId);
+
+    void meetingWasHeld(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId);
+
+    void newMeetingWasCancelled(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId);
+
 }

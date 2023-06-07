@@ -1,6 +1,7 @@
 package meetings.dto;
 
 import commons.dto.MeetingGroupId;
+import io.vavr.control.Option;
 import lombok.Value;
 
 import java.time.LocalDate;
@@ -11,4 +12,5 @@ public class MeetingDraft {
     LocalDate meetingDate;
     GroupMeetingHostId groupMeetingHostId;
     GroupMeetingName groupMeetingName;
+    Option<AttendeesLimit> attendeesLimit;
 }

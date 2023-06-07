@@ -23,4 +23,8 @@ class MeetingGroup {
     public void add(GroupMemberId groupMemberId) {
         groupMemberIds.add(groupMemberId);
     }
+
+    public void remove(GroupMemberId groupMemberId) {
+        groupMemberIds.remove(groupMemberId);
+    }
 }

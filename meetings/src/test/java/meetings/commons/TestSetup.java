@@ -6,11 +6,13 @@ import commons.dto.GroupMemberId;
 import commons.dto.GroupOrganizerId;
 import commons.dto.MeetingGroupId;
 import commons.dto.UserId;
+import commons.event.publisher.EventPublisher;
 import meetings.MeetingsConfiguration;
 import meetings.MeetingsFacade;
 import meetings.dto.GroupMeetingHostId;
 import meetings.dto.GroupMeetingName;
 import org.junit.Before;
+import org.mockito.Mockito;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -19,12 +21,14 @@ public class TestSetup {
     protected InMemoryActiveSubscribers activeSubscribers;
     protected MeetingsFacade meetingsFacade;
     protected Calendar calendar;
+    protected EventPublisher eventPublisher;
 
     @Before
     public void testSetup() {
         activeSubscribers = new InMemoryActiveSubscribers();
         calendar = new FixedDateCalendar(LocalDate.now());
-        meetingsFacade = new MeetingsConfiguration().inMemoryMeetingsFacade(activeSubscribers, calendar);
+        eventPublisher = Mockito.mock(EventPublisher.class);
+        meetingsFacade = new MeetingsConfiguration().inMemoryMeetingsFacade(activeSubscribers, eventPublisher, calendar);
     }
 
     protected void subscriptionRenewed(GroupMeetingHostId groupMeetingHostId) {

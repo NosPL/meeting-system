@@ -2,10 +2,8 @@ package meetings;
 
 import commons.active.subscribers.ActiveSubscribersFinder;
 import commons.calendar.Calendar;
-import commons.dto.GroupMemberId;
-import commons.dto.GroupOrganizerId;
-import commons.dto.MeetingGroupId;
-import commons.dto.UserId;
+import commons.dto.*;
+import commons.event.publisher.EventPublisher;
 import io.vavr.control.Either;
 import lombok.AllArgsConstructor;
 import meetings.dto.*;
@@ -21,6 +19,7 @@ class MeetingsScheduler {
     private final ActiveSubscribersFinder activeSubscribersFinder;
     private final MeetingRepository meetingRepository;
     private final MeetingGroupRepository meetingGroupRepository;
+    private final EventPublisher eventPublisher;
     private final Calendar calendar;
 
     Either<ScheduleMeetingFailure, GroupMeetingId> scheduleNewMeeting(GroupOrganizerId groupOrganizerId, MeetingDraft meetingDraft) {
@@ -42,6 +41,7 @@ class MeetingsScheduler {
             return left(MEETING_NAME_IS_BLANK);
         var meeting = Meeting.create(groupOrganizerId, meetingDraft);
         var groupMeetingId = meetingRepository.save(meeting);
+        eventPublisher.newMeetingWasScheduled(meeting.getMeetingGroupId(), groupMeetingId);
         return right(groupMeetingId);
     }
 

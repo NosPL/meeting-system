@@ -1,18 +1,25 @@
 package meetings;
 
-import commons.dto.GroupMemberId;
-import commons.dto.GroupOrganizerId;
-import commons.dto.MeetingGroupId;
+import commons.dto.*;
 import io.vavr.control.Either;
-import meetings.dto.GroupMeetingId;
-import meetings.dto.MeetingDraft;
-import meetings.dto.ScheduleMeetingFailure;
+import io.vavr.control.Option;
+import meetings.dto.*;
 
 public interface MeetingsFacade {
 
+    Either<ScheduleMeetingFailure, GroupMeetingId> scheduleNewMeeting(GroupOrganizerId groupOrganizerId, MeetingDraft meetingDraft);
+
+    Option<CancelMeetingFailure> cancelMeeting(GroupOrganizerId groupOrganizerId, GroupMeetingId groupMeetingIdId);
+
+    Option<SignUpForMeetingFailure> signUpForMeeting(GroupMemberId groupMemberId, GroupMeetingId groupMeetingId);
+
+    Option<SignOutFailure> signOutFromMeeting(GroupMemberId groupMemberId, GroupMeetingId groupMeetingId);
+
     void newMeetingGroupCreated(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId);
+
+    void meetingGroupWasRemoved(MeetingGroupId meetingGroupId);
 
     void newMemberJoinedGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId);
 
-    Either<ScheduleMeetingFailure, GroupMeetingId> scheduleNewMeeting(GroupOrganizerId groupOrganizerId, MeetingDraft meetingDraft);
+    void memberLeftTheMeetingGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId);
 }
