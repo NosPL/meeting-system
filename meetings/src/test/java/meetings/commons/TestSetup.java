@@ -21,11 +21,15 @@ public class TestSetup {
     @Before
     public void testSetup() {
         calendar = new FixedDateCalendar(LocalDate.now());
-        meetingsFacade = new MeetingsConfiguration().meetingsFacade(calendar);
+        meetingsFacade = new MeetingsConfiguration().inMemoryMeetingsFacade(calendar);
     }
 
     protected void subscriptionRenewed(GroupMeetingHostId groupMeetingHostId) {
         meetingsFacade.subscriptionRenewed(new UserId(groupMeetingHostId.getId()));
+    }
+
+    protected void subscriptionRenewed(GroupOrganizerId groupOrganizerId) {
+        meetingsFacade.subscriptionRenewed(new UserId(groupOrganizerId.getId()));
     }
 
     protected void newMemberJoinedGroup(GroupMeetingHostId groupMeetingHostId, MeetingGroupId meetingGroupId) {

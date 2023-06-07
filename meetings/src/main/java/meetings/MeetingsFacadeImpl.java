@@ -10,31 +10,38 @@ import meetings.dto.GroupMeetingId;
 import meetings.dto.MeetingDraft;
 import meetings.dto.ScheduleMeetingFailure;
 
+import java.util.HashSet;
+
 @AllArgsConstructor
 class MeetingsFacadeImpl implements MeetingsFacade {
+    private final MeetingGroupRepository meetingGroupRepository;
+    private final ActiveSubscriptions activeSubscriptions;
+    private final MeetingsScheduler meetingsScheduler;
 
     @Override
     public void subscriptionRenewed(UserId userId) {
-
+        activeSubscriptions.add(userId);
     }
 
     @Override
     public void subscriptionExpired(UserId userId) {
-
+        activeSubscriptions.remove(userId);
     }
 
     @Override
     public void newMeetingGroupCreated(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId) {
-
+        meetingGroupRepository.save(new MeetingGroup(meetingGroupId, groupOrganizerId, new HashSet<>()));
     }
 
     @Override
     public void newMemberJoinedGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
-
+        meetingGroupRepository
+                .findById(meetingGroupId)
+                .peek(meetingGroup -> meetingGroup.add(groupMemberId));
     }
 
     @Override
     public Either<ScheduleMeetingFailure, GroupMeetingId> scheduleNewMeeting(GroupOrganizerId groupOrganizerId, MeetingDraft meetingDraft) {
-        return null;
+        return meetingsScheduler.scheduleNewMeeting(groupOrganizerId, meetingDraft);
     }
 }

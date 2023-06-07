@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Value
 public class MeetingDraft {
     MeetingGroupId meetingGroupId;
-    LocalDate localDate;
+    LocalDate meetingDate;
     GroupMeetingHostId groupMeetingHostId;
     GroupMeetingName groupMeetingName;
 }

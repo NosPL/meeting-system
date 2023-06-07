@@ -2,6 +2,7 @@ package meetings.scheduling.meetings;
 
 import commons.dto.GroupOrganizerId;
 import commons.dto.MeetingGroupId;
+import commons.dto.UserId;
 import meetings.MeetingsConfiguration;
 import meetings.commons.FixedDateCalendar;
 import meetings.commons.TestSetup;
@@ -23,6 +24,8 @@ public class ScheduleNewMeetingHappyPath extends TestSetup {
     public void scheduleGroupMeetingHappyPath() {
 //        given that meeting group was created
         meetingsFacade.newMeetingGroupCreated(groupOrganizerId, meetingGroupId);
+//        and group organizer is subscribed
+        subscriptionRenewed(groupOrganizerId);
 //        and meeting date is 3 days in advance
         var date3DaysFromNow = calendar.getCurrentDate().plusDays(3);
 //        and proposed host is subscribed
