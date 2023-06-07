@@ -17,7 +17,6 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
     private final AdministratorRepository administratorRepository;
     private final ProposalRepository proposalRepository;
     private final MeetingGroupRepository meetingGroupRepository;
-    private final GroupMembershipRepository membershipRepository;
     private final ProposalSubmitter proposalSubmitter;
     private final ProposalAccepter proposalAccepter;
     private final ProposalRejecter proposalRejecter;
@@ -64,21 +63,8 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
 
     @Override
     public Option<MeetingGroupDetails> findMeetingGroupDetails(MeetingGroupId meetingGroupId) {
-        var groupMembers = getGroupMembers(meetingGroupId);
         return meetingGroupRepository
                 .findById(meetingGroupId)
-                .map(meetingGroup -> toDto(meetingGroup, groupMembers));
-    }
-
-    private List<GroupMemberId> getGroupMembers(MeetingGroupId meetingGroupId) {
-        return membershipRepository
-                .findByMeetingGroupId(meetingGroupId)
-                .stream()
-                .map(GroupMembership::getGroupMemberId)
-                .toList();
-    }
-
-    private MeetingGroupDetails toDto(MeetingGroup meetingGroup, List<GroupMemberId> groupMembers) {
-        return new MeetingGroupDetails(meetingGroup.getMeetingGroupId(), meetingGroup.getName(), meetingGroup.getGroupOrganizerId(), groupMembers);
+                .map(MeetingGroup::toDto);
     }
 }
