@@ -40,6 +40,10 @@ public class TestSetup {
         meetingsFacade.subscriptionExpired(new UserId(groupOrganizerId.getId()));
     }
 
+    protected void subscriptionExpired(GroupMeetingHostId groupMeetingHostId) {
+        meetingsFacade.subscriptionExpired(new UserId(groupMeetingHostId.getId()));
+    }
+
     protected GroupMeetingName uniqueNotBlankMeetingName() {
         return new GroupMeetingName(UUID.randomUUID().toString());
     }
