@@ -17,6 +17,8 @@ public interface MeetingGroupsFacade {
 
     Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft);
 
+    Option<RemoveProposalFailure> removeWaitingProposal(GroupOrganizerId groupOrganizerId, ProposalId proposalId);
+
     Either<ProposalAcceptanceRejected, MeetingGroupId> acceptProposal(AdministratorId administratorId, ProposalId proposalId);
 
     Option<FailedToRejectProposal> rejectProposal(AdministratorId administratorId, ProposalId proposalId);

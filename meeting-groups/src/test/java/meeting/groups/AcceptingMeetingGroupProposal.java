@@ -3,13 +3,12 @@ package meeting.groups;
 import meeting.groups.commons.TestSetup;
 import org.junit.Test;
 
-import java.util.List;
-
 import static io.vavr.Tuple.of;
 import static io.vavr.control.Either.left;
 import static meeting.groups.dto.ProposalAcceptanceRejected.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 
 public class AcceptingMeetingGroupProposal extends TestSetup {
 
@@ -17,8 +16,10 @@ public class AcceptingMeetingGroupProposal extends TestSetup {
     public void userThatIsNotAdministratorShouldFailToAcceptMeetingGroupProposal() {
 //        given that group proposal was submitted
         var proposalId = submitRandomProposal();
-//        when not-administrator tries to accept group proposal
-        var result = meetingGroupsFacade.acceptProposal(notAdministrator, proposalId);
+//        and user is not administrator
+        meetingGroupsFacade.administratorRemoved(administrator);
+//        when he tries to accept group proposal
+        var result = meetingGroupsFacade.acceptProposal(administrator, proposalId);
 //        then he fails
         assertEquals(left(USER_IS_NOT_ADMINISTRATOR), result);
     }
@@ -31,7 +32,7 @@ public class AcceptingMeetingGroupProposal extends TestSetup {
         assert meetingGroupsFacade.acceptProposal(administrator, proposalId).isRight();
 //        when administrator tries to accept the same proposal again
         var result = meetingGroupsFacade.acceptProposal(administrator, proposalId);
-//        then he fails because proposal was already accepted
+//        then he fails
         assertEquals(left(PROPOSAL_WAS_ALREADY_ACCEPTED), result);
     }
 
@@ -43,7 +44,7 @@ public class AcceptingMeetingGroupProposal extends TestSetup {
         assert meetingGroupsFacade.rejectProposal(administrator, proposalId).isEmpty();
 //        when administrator tries to accept the same proposal
         var result = meetingGroupsFacade.acceptProposal(administrator, proposalId);
-//        then he fails because proposal was already rejected
+//        then he fails
         assertEquals(left(PROPOSAL_WAS_ALREADY_REJECTED), result);
     }
 
@@ -64,6 +65,7 @@ public class AcceptingMeetingGroupProposal extends TestSetup {
 //        then he succeeds
         assertTrue(result.isRight());
 //        and 'new meeting group was created' event got emitted
-        assert eventPublisherMock.groupCreatedEventInvoked(List.of(of(subscribedGroupOrganizer, result.get())));
+        var meetingGroupId = result.get();
+        verify(eventPublisher).newMeetingGroupCreated(groupOrganizer, meetingGroupId);
     }
 }

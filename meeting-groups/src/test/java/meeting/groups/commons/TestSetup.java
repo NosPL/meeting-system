@@ -2,36 +2,36 @@ package meeting.groups.commons;
 
 import commons.active.subscribers.InMemoryActiveSubscribers;
 import commons.dto.*;
+import commons.event.publisher.EventPublisher;
 import meeting.groups.MeetingGroupsConfiguration;
 import meeting.groups.MeetingGroupsFacade;
 import meeting.groups.dto.ProposalDraft;
 import meeting.groups.dto.ProposalId;
 import org.junit.Before;
+import org.mockito.Mockito;
 
 import java.util.UUID;
 
 public class TestSetup {
-    protected final UserId subscribedUser = new UserId("subscribed-user");
-    protected final UserId notSubscribedUser = new UserId("not-subscribed-user");
-    protected final GroupOrganizerId subscribedGroupOrganizer = new GroupOrganizerId("subscribed-group-organizer");
+    protected final UserId user = new UserId("subscribed-user");
+    protected final GroupOrganizerId groupOrganizer = new GroupOrganizerId("subscribed-group-organizer");
     protected final AdministratorId administrator = new AdministratorId("administrator");
-    protected final AdministratorId notAdministrator = new AdministratorId("not-administrator");
     protected InMemoryActiveSubscribers activeSubscribers;
-    protected EventPublisherMock eventPublisherMock;
+    protected EventPublisher eventPublisher;
     protected MeetingGroupsFacade meetingGroupsFacade;
 
     @Before
     public void setup() {
         activeSubscribers = new InMemoryActiveSubscribers();
-        eventPublisherMock = new EventPublisherMock();
-        meetingGroupsFacade = new MeetingGroupsConfiguration().inMemoryMeetingGroupsFacade(activeSubscribers, eventPublisherMock);
-        activeSubscribers.add(subscribedUser);
-        activeSubscribers.add(new UserId(subscribedGroupOrganizer.getId()));
+        eventPublisher = Mockito.mock(EventPublisher.class);
+        meetingGroupsFacade = new MeetingGroupsConfiguration().inMemoryMeetingGroupsFacade(activeSubscribers, eventPublisher);
+        activeSubscribers.add(user);
+        activeSubscribers.add(new UserId(groupOrganizer.getId()));
         meetingGroupsFacade.administratorAdded(administrator);
     }
 
     protected MeetingGroupId createMeetingGroup() {
-        return createMeetingGroup(subscribedGroupOrganizer, randomGroupName());
+        return createMeetingGroup(groupOrganizer, randomGroupName());
     }
 
     protected MeetingGroupId createMeetingGroup(GroupOrganizerId groupOrganizerId) {
@@ -52,11 +52,15 @@ public class TestSetup {
     }
 
     protected ProposalId submitProposal(ProposalDraft proposalDraft) {
-        return meetingGroupsFacade.submitMeetingGroupProposal(subscribedGroupOrganizer, proposalDraft).get();
+        return meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizer, proposalDraft).get();
     }
 
     protected ProposalId submitProposal(GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft) {
         return meetingGroupsFacade.submitMeetingGroupProposal(groupOrganizerId, proposalDraft).get();
+    }
+
+    protected ProposalId submitProposal(GroupOrganizerId groupOrganizerId) {
+        return submitProposal(groupOrganizerId, randomProposalDraft());
     }
 
     protected ProposalDraft randomProposalDraft() {
@@ -85,5 +89,13 @@ public class TestSetup {
 
     protected GroupMeetingId randomGroupMeetingId() {
         return new GroupMeetingId(UUID.randomUUID().toString());
+    }
+
+    protected GroupMemberId groupMember(UserId userId) {
+        return new GroupMemberId(userId.getId());
+    }
+
+    protected UserId user(GroupOrganizerId groupOrganizerId) {
+        return new UserId(groupOrganizerId.getId());
     }
 }

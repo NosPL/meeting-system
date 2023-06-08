@@ -15,17 +15,19 @@ public class RejectingMeetingGroupProposal extends TestSetup {
     public void userThatIsNotAdministratorShouldFailToRejectProposal() {
 //        given that proposal was submitted
         var proposalId = submitRandomProposal();
-//        when user that is not administrator tries to reject proposal
-        var result = meetingGroupsFacade.rejectProposal(notAdministrator, proposalId);
-//        then he fails because he is not administrator
+//        and user is not administrator
+        meetingGroupsFacade.administratorRemoved(administrator);
+//        when user tries to reject proposal
+        var result = meetingGroupsFacade.rejectProposal(administrator, proposalId);
+//        then he fails
         assertEquals(Option.of(USER_IS_NOT_ADMINISTRATOR), result);
     }
 
     @Test
     public void administratorShouldFailToRejectProposalThatDoesNotExist() {
-//        when administrator tries reject non-existent proposal
+//        when administrator tries reject not existing proposal
         var result = meetingGroupsFacade.rejectProposal(administrator, randomProposalId());
-//        then he fails because proposal doesn't exist
+//        then he fails
         assertEquals(Option.of(PROPOSAL_WITH_GIVEN_ID_DOESNT_EXIST), result);
     }
 

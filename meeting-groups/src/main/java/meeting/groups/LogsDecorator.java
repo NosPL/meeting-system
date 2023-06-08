@@ -41,6 +41,14 @@ class LogsDecorator implements MeetingGroupsFacade {
     }
 
     @Override
+    public Option<RemoveProposalFailure> removeWaitingProposal(GroupOrganizerId groupOrganizerId, ProposalId proposalId) {
+        return meetingGroupsFacade
+                .removeWaitingProposal(groupOrganizerId, proposalId)
+                .peek(failure -> log.info("failed to remove waiting proposal, user id {}, proposal id {}, reason: {}", groupOrganizerId.getId(), proposalId.getId(), failure))
+                .onEmpty(() -> log.info("group organizer removed waiting proposal, group organizer id {}, proposal id {}", groupOrganizerId.getId(), proposalId.getId()));
+    }
+
+    @Override
     public Either<ProposalAcceptanceRejected, MeetingGroupId> acceptProposal(AdministratorId administratorId, ProposalId proposalId) {
         return meetingGroupsFacade
                 .acceptProposal(administratorId, proposalId)

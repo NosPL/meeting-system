@@ -23,6 +23,8 @@ import static meeting.groups.dto.LeaveGroupFailure.GROUP_DOES_NOT_EXIST;
 import static meeting.groups.dto.ProposalAcceptanceRejected.PROPOSAL_WITH_GIVEN_ID_DOES_NOT_EXIST;
 import static meeting.groups.dto.ProposalAcceptanceRejected.USER_IS_NOT_ADMINISTRATOR;
 import static meeting.groups.dto.RemoveGroupFailure.*;
+import static meeting.groups.dto.RemoveProposalFailure.*;
+import static meeting.groups.dto.RemoveProposalFailure.USER_IS_NOT_GROUP_ORGANIZER;
 
 @AllArgsConstructor
 @Slf4j
@@ -59,6 +61,24 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
     @Override
     public Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft) {
         return proposalSubmitter.submitMeetingGroupProposal(groupOrganizerId, proposalDraft);
+    }
+
+    @Override
+    public Option<RemoveProposalFailure> removeWaitingProposal(GroupOrganizerId groupOrganizerId, ProposalId proposalId) {
+        return proposalRepository
+                .findById(proposalId)
+                .toEither(PROPOSAL_DOES_NOT_EXIST)
+                .map(proposal -> remove(groupOrganizerId, proposal))
+                .fold(Option::of, identity());
+    }
+
+    private Option<RemoveProposalFailure> remove(GroupOrganizerId groupOrganizerId, Proposal proposal) {
+        if (!proposal.getGroupOrganizerId().equals(groupOrganizerId))
+            return of(USER_IS_NOT_GROUP_ORGANIZER);
+        if (!proposal.isWaitingForAdministratorDecision())
+            return of(PROPOSAL_ALREADY_PROCESSED);
+        proposalRepository.removeById(proposal.getProposalId());
+        return Option.none();
     }
 
     @Override
@@ -105,9 +125,9 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
 
     private Option<RemoveGroupFailure> remove(MeetingGroup meetingGroup, GroupOrganizerId groupOrganizerId) {
         if (meetingGroup.hasScheduledMeetings())
-            return Option.of(GROUP_HAS_SCHEDULED_MEETINGS);
+            return of(GROUP_HAS_SCHEDULED_MEETINGS);
         if (!meetingGroup.getGroupOrganizerId().equals(groupOrganizerId))
-            return Option.of(USER_IS_NOT_GROUP_ORGANIZER);
+            return of(RemoveGroupFailure.USER_IS_NOT_GROUP_ORGANIZER);
         var meetingGroupId = meetingGroup.getMeetingGroupId();
         meetingGroupRepository.removeById(meetingGroupId);
         eventPublisher.meetingGroupWasRemoved(meetingGroupId);
