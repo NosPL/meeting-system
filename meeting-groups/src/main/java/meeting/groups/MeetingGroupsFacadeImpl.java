@@ -12,15 +12,17 @@ import meeting.groups.query.dto.MeetingGroupDetails;
 import meeting.groups.query.dto.ProposalDto;
 
 import java.util.List;
-import java.util.function.Function;
 
 import static io.vavr.control.Either.left;
 import static io.vavr.control.Option.of;
+import static java.util.function.Function.identity;
 import static meeting.groups.dto.FailedToRejectProposal.PROPOSAL_WITH_GIVEN_ID_DOESNT_EXIST;
 import static meeting.groups.dto.JoinGroupFailure.MEETING_GROUP_DOES_NOT_EXIST;
 import static meeting.groups.dto.JoinGroupFailure.USER_SUBSCRIPTION_IS_NOT_ACTIVE;
+import static meeting.groups.dto.LeaveGroupFailure.GROUP_DOES_NOT_EXIST;
 import static meeting.groups.dto.ProposalAcceptanceRejected.PROPOSAL_WITH_GIVEN_ID_DOES_NOT_EXIST;
 import static meeting.groups.dto.ProposalAcceptanceRejected.USER_IS_NOT_ADMINISTRATOR;
+import static meeting.groups.dto.RemoveGroupFailure.*;
 
 @AllArgsConstructor
 @Slf4j
@@ -42,6 +44,16 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
                 .flatMap(meetingGroup -> meetingGroup.join(userId))
                 .peek(groupMemberId -> eventPublisher.newMemberJoinedMeetingGroup(groupMemberId, meetingGroupId))
                 .swap().toOption();
+    }
+
+    @Override
+    public Option<LeaveGroupFailure> leaveGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
+        return meetingGroupRepository
+                .findById(meetingGroupId)
+                .toEither(GROUP_DOES_NOT_EXIST)
+                .map(meetingGroup -> meetingGroup.leave(groupMemberId))
+                .peek(failure -> failure.onEmpty(() -> eventPublisher.groupMemberLeftGroup(groupMemberId, meetingGroupId)))
+                .fold(Option::of, identity());
     }
 
     @Override
@@ -79,17 +91,58 @@ class MeetingGroupsFacadeImpl implements MeetingGroupsFacade {
                 .findById(proposalId)
                 .toEither(PROPOSAL_WITH_GIVEN_ID_DOESNT_EXIST)
                 .map(Proposal::reject)
-                .fold(Option::of, Function.identity());
+                .fold(Option::of, identity());
     }
 
     @Override
-    public void addAdministrator(AdministratorId administratorId) {
+    public Option<RemoveGroupFailure> removeGroup(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId) {
+        return meetingGroupRepository
+                .findById(meetingGroupId)
+                .toEither(GROUP_DOESNT_EXIST)
+                .map(meetingGroup -> remove(meetingGroup, groupOrganizerId))
+                .fold(Option::of, identity());
+    }
+
+    private Option<RemoveGroupFailure> remove(MeetingGroup meetingGroup, GroupOrganizerId groupOrganizerId) {
+        if (meetingGroup.hasScheduledMeetings())
+            return Option.of(GROUP_HAS_SCHEDULED_MEETINGS);
+        if (!meetingGroup.getGroupOrganizerId().equals(groupOrganizerId))
+            return Option.of(USER_IS_NOT_GROUP_ORGANIZER);
+        var meetingGroupId = meetingGroup.getMeetingGroupId();
+        meetingGroupRepository.removeById(meetingGroupId);
+        eventPublisher.meetingGroupWasRemoved(meetingGroupId);
+        return Option.none();
+    }
+
+    @Override
+    public void administratorAdded(AdministratorId administratorId) {
         administratorRepository.save(new Administrator(administratorId));
     }
 
     @Override
-    public void removeAdministrator(AdministratorId administratorId) {
+    public void administratorRemoved(AdministratorId administratorId) {
         administratorRepository.removeById(administratorId);
+    }
+
+    @Override
+    public void newMeetingScheduled(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId) {
+        meetingGroupRepository
+                .findById(meetingGroupId)
+                .peek(meetingGroup -> meetingGroup.newMeetingWasScheduled(groupMeetingId));
+    }
+
+    @Override
+    public void meetingWasHeld(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId) {
+        meetingGroupRepository
+                .findById(meetingGroupId)
+                .peek(meetingGroup -> meetingGroup.meetingHeld(groupMeetingId));
+    }
+
+    @Override
+    public void meetingCancelled(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId) {
+        meetingGroupRepository
+                .findById(meetingGroupId)
+                .peek(meetingGroup -> meetingGroup.meetingCancelled(groupMeetingId));
     }
 
     @Override

@@ -62,8 +62,4 @@ public class JoiningMeetingGroup extends TestSetup {
         var expectedInvocations = List.of(of(groupMemberId, meetingGroupId));
         assert eventPublisherMock.newMemberJoinedGroupEventInvoked(expectedInvocations);
     }
-
-    private MeetingGroupId randomMeetingGroupId() {
-        return new MeetingGroupId(UUID.randomUUID().toString());
-    }
 }

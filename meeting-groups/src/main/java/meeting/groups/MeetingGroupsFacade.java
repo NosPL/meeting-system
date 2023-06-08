@@ -13,15 +13,25 @@ public interface MeetingGroupsFacade {
 
     Option<JoinGroupFailure> joinGroup(UserId userId, MeetingGroupId meetingGroupId);
 
+    Option<LeaveGroupFailure> leaveGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId);
+
     Either<ProposalRejected, ProposalId> submitMeetingGroupProposal(GroupOrganizerId groupOrganizerId, ProposalDraft proposalDraft);
 
     Either<ProposalAcceptanceRejected, MeetingGroupId> acceptProposal(AdministratorId administratorId, ProposalId proposalId);
 
     Option<FailedToRejectProposal> rejectProposal(AdministratorId administratorId, ProposalId proposalId);
 
-    void addAdministrator(AdministratorId administratorId);
+    Option<RemoveGroupFailure> removeGroup(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId);
 
-    void removeAdministrator(AdministratorId administratorId);
+    void administratorAdded(AdministratorId administratorId);
+
+    void administratorRemoved(AdministratorId administratorId);
+
+    void newMeetingScheduled(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId);
+
+    void meetingWasHeld(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId);
+
+    void meetingCancelled(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId);
 
     List<ProposalDto> findAllProposalsOfGroupOrganizer(GroupOrganizerId groupOrganizerId);
 

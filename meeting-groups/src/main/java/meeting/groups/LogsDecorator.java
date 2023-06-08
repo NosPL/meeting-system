@@ -20,7 +20,16 @@ class LogsDecorator implements MeetingGroupsFacade {
     public Option<JoinGroupFailure> joinGroup(UserId userId, MeetingGroupId meetingGroupId) {
         return meetingGroupsFacade
                 .joinGroup(userId, meetingGroupId)
-                .peek(failure -> log.info("user failed to join meeting group, user id {}, reason {}", meetingGroupId.getId(), failure));
+                .peek(failure -> log.info("user failed to join meeting group, user id {}, reason {}", meetingGroupId.getId(), failure))
+                .onEmpty(() -> log.info("user joined group, user id {}", userId.getId()));
+    }
+
+    @Override
+    public Option<LeaveGroupFailure> leaveGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
+        return meetingGroupsFacade
+                .leaveGroup(groupMemberId, meetingGroupId)
+                .peek(failure -> log.info("group member failed to leave the group, group member id{}, reason: {}", groupMemberId.getId(), failure))
+                .onEmpty(() -> log.info("member left the group, member id {}, group id {}", groupMemberId.getId(), meetingGroupId.getId()));
     }
 
     @Override
@@ -44,19 +53,45 @@ class LogsDecorator implements MeetingGroupsFacade {
         return meetingGroupsFacade
                 .rejectProposal(administratorId, proposalId)
                 .peek(failure -> log.info("failed to reject proposal, administrator id {}, proposal id {}, reason: {}", administratorId.getId(), proposalId.getId(), failure))
-                .onEmpty(() -> log.info("user rejected proposal, administrator id {}, proposal id {}", administratorId.getId(), proposalId.getId()));
+                .onEmpty(() -> log.info("proposal got rejected, administrator id {}, proposal id {}", administratorId.getId(), proposalId.getId()));
     }
 
     @Override
-    public void addAdministrator(AdministratorId administratorId) {
-        meetingGroupsFacade.addAdministrator(administratorId);
+    public Option<RemoveGroupFailure> removeGroup(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId) {
+        return meetingGroupsFacade
+                .removeGroup(groupOrganizerId, meetingGroupId)
+                .peek(failure -> log.info("failed to remove group, user id {}, reason: {}", groupOrganizerId.getId(), meetingGroupId.getId()))
+                .onEmpty(() -> log.info("group organizer removed group, organizer id {}, group id {}", groupOrganizerId.getId(), meetingGroupId.getId()));
+    }
+
+    @Override
+    public void administratorAdded(AdministratorId administratorId) {
+        meetingGroupsFacade.administratorAdded(administratorId);
         log.info("added new administrator with id {}", administratorId.getId());
     }
 
     @Override
-    public void removeAdministrator(AdministratorId userId) {
-        meetingGroupsFacade.removeAdministrator(userId);
+    public void administratorRemoved(AdministratorId userId) {
+        meetingGroupsFacade.administratorRemoved(userId);
         log.info("removed administrator, user id {}", userId.getId());
+    }
+
+    @Override
+    public void newMeetingScheduled(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId) {
+        meetingGroupsFacade.newMeetingScheduled(meetingGroupId, groupMeetingId);
+        log.info("new group meeting got scheduled, group id {}, meeting id {}", meetingGroupId.getId(), groupMeetingId.getId());
+    }
+
+    @Override
+    public void meetingWasHeld(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId) {
+        meetingGroupsFacade.meetingWasHeld(meetingGroupId, groupMeetingId);
+        log.info("group meeting was held, group id {}, meeting id {}", meetingGroupId.getId(), groupMeetingId.getId());
+    }
+
+    @Override
+    public void meetingCancelled(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId) {
+        meetingGroupsFacade.meetingCancelled(meetingGroupId, groupMeetingId);
+        log.info("group meeting was cancelled, group id {}, meeting id {}", meetingGroupId.getId(), groupMeetingId.getId());
     }
 
     @Override

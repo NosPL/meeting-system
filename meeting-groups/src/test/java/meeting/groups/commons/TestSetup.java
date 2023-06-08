@@ -1,10 +1,7 @@
 package meeting.groups.commons;
 
 import commons.active.subscribers.InMemoryActiveSubscribers;
-import commons.dto.AdministratorId;
-import commons.dto.GroupOrganizerId;
-import commons.dto.MeetingGroupId;
-import commons.dto.UserId;
+import commons.dto.*;
 import meeting.groups.MeetingGroupsConfiguration;
 import meeting.groups.MeetingGroupsFacade;
 import meeting.groups.dto.ProposalDraft;
@@ -30,7 +27,7 @@ public class TestSetup {
         meetingGroupsFacade = new MeetingGroupsConfiguration().inMemoryMeetingGroupsFacade(activeSubscribers, eventPublisherMock);
         activeSubscribers.add(subscribedUser);
         activeSubscribers.add(new UserId(subscribedGroupOrganizer.getId()));
-        meetingGroupsFacade.addAdministrator(administrator);
+        meetingGroupsFacade.administratorAdded(administrator);
     }
 
     protected MeetingGroupId createMeetingGroup() {
@@ -76,5 +73,17 @@ public class TestSetup {
 
     protected String randomGroupName() {
         return UUID.randomUUID().toString();
+    }
+
+    protected MeetingGroupId randomMeetingGroupId() {
+        return new MeetingGroupId(UUID.randomUUID().toString());
+    }
+
+    protected GroupOrganizerId randomGroupOrganizerId() {
+        return new GroupOrganizerId(UUID.randomUUID().toString());
+    }
+
+    protected GroupMeetingId randomGroupMeetingId() {
+        return new GroupMeetingId(UUID.randomUUID().toString());
     }
 }

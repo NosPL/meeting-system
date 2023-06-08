@@ -51,7 +51,7 @@ public class AcceptingMeetingGroupProposal extends TestSetup {
     public void administratorShouldFailToAcceptProposalThatDoesNotExist() {
 //        when administrator tries to accept not existing proposal
         var result = meetingGroupsFacade.acceptProposal(administrator, randomProposalId());
-//        then he fails at second attempt
+//        then he fails
         assertEquals(left(PROPOSAL_WITH_GIVEN_ID_DOES_NOT_EXIST), result);
     }
 
