@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Value;
 import meetings.dto.*;
+import meetings.query.dto.MeetingDetails;
+import meetings.query.dto.MeetingDetails.WaitListDetails;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -21,6 +23,7 @@ import static meetings.dto.SignOnWaitListFailure.ATTENDEES_LIMIT_IS_NOT_REACHED;
 import static meetings.dto.SignOnWaitListFailure.WAIT_LIST_IS_NOT_AVAILABLE;
 import static meetings.dto.SignOutFailure.USER_WAS_NOT_SIGN_IN;
 import static meetings.dto.SignUpForMeetingFailure.*;
+import static meetings.dto.WaitList.WAIT_LIST_AVAILABLE;
 import static meetings.dto.WaitList.WAIT_LIST_NOT_AVAILABLE;
 
 @AllArgsConstructor(access = PRIVATE)
@@ -98,6 +101,17 @@ class Meeting {
                 WaitList.crateFrom(meetingDraft.getWaitList()));
     }
 
+    MeetingDetails toDto() {
+        return new MeetingDetails(
+                groupMeetingId,
+                meetingGroupId,
+                groupMeetingHostId,
+                groupMeetingName,
+                attendeesLimit.map(AttendeesLimit::new),
+                new HashSet<>(attendees),
+                waitList.toDto());
+    }
+
     @Value
     static class AttendeeSignedUpFromWaitList {
         AttendeeId attendeeId;
@@ -105,27 +119,33 @@ class Meeting {
 
     @AllArgsConstructor(access = PRIVATE)
     private static class WaitList {
+        @Getter
         private final meetings.dto.WaitList waitList;
         private final LinkedList<GroupMemberId> groupMembers;
 
-        Option<AttendeeId> pop() {
+        private Option<AttendeeId> pop() {
             return of(groupMembers.pollFirst())
                     .map(GroupMemberId::getId)
                     .map(AttendeeId::new);
         }
 
-        void remove(GroupMemberId groupMemberId) {
+        private void remove(GroupMemberId groupMemberId) {
             groupMembers.remove(groupMemberId);
         }
 
-        Option<SignOnWaitListFailure> signOn(GroupMemberId groupMemberId) {
+        private Option<SignOnWaitListFailure> signOn(GroupMemberId groupMemberId) {
             if (waitList == WAIT_LIST_NOT_AVAILABLE)
                 return of(WAIT_LIST_IS_NOT_AVAILABLE);
             groupMembers.addLast(groupMemberId);
             return Option.none();
         }
 
-        static WaitList crateFrom(meetings.dto.WaitList waitList) {
+        private WaitListDetails toDto() {
+            boolean allowed = waitList == WAIT_LIST_AVAILABLE;
+            return new WaitListDetails(allowed, new LinkedList<>(groupMembers));
+        }
+
+        private static WaitList crateFrom(meetings.dto.WaitList waitList) {
             return new WaitList(waitList, new LinkedList<>());
         }
     }

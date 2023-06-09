@@ -40,8 +40,4 @@ public class CancelMeetingFailingPaths extends TestSetup {
     private GroupOrganizerId randomGroupOrganizerId() {
         return new GroupOrganizerId(UUID.randomUUID().toString());
     }
-
-    private GroupMeetingId randomGroupMeetingId() {
-        return new GroupMeetingId(UUID.randomUUID().toString());
-    }
 }

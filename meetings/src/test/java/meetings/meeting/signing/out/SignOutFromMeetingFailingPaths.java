@@ -1,20 +1,15 @@
 package meetings.meeting.signing.out;
 
-import commons.dto.GroupMeetingId;
 import commons.dto.GroupMemberId;
 import commons.dto.GroupOrganizerId;
 import commons.dto.MeetingGroupId;
 import io.vavr.control.Option;
 import meetings.commons.TestSetup;
-import meetings.dto.SignOutFailure;
-import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.UUID;
-
-import static meetings.dto.SignOutFailure.*;
+import static meetings.dto.SignOutFailure.MEETING_DOES_NOT_EXIST;
+import static meetings.dto.SignOutFailure.USER_WAS_NOT_SIGN_IN;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 public class SignOutFromMeetingFailingPaths extends TestSetup {
     private final GroupOrganizerId groupOrganizerId = new GroupOrganizerId("group-organizer-id");
@@ -50,9 +45,5 @@ public class SignOutFromMeetingFailingPaths extends TestSetup {
         var result = meetingsFacade.signOutFromMeeting(asAttendee(groupMemberId), randomGroupMeetingId());
 //        then he fails
         assertEquals(Option.of(MEETING_DOES_NOT_EXIST), result);
-    }
-
-    private GroupMeetingId randomGroupMeetingId() {
-        return new GroupMeetingId(UUID.randomUUID().toString());
     }
 }

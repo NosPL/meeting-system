@@ -38,7 +38,7 @@ public class SignOnMeetingWaitListHappyPath extends WaitListTestSetup {
         assertEquals(Option.none(), result);
     }
 
-    private MeetingDraft meetingDraft(AttendeesLimit attendeesLimit, WaitList waitList) {
+    protected MeetingDraft meetingDraft(AttendeesLimit attendeesLimit, WaitList waitList) {
         return new MeetingDraft(
                 meetingGroupId,
                 calendar.getCurrentDate().plusDays(3),

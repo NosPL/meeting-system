@@ -8,6 +8,7 @@ import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import meetings.dto.*;
 import meetings.notifications.MeetingsNotificationsFacade;
+import meetings.query.dto.MeetingDetails;
 
 import java.util.HashSet;
 
@@ -18,6 +19,7 @@ import static meetings.dto.SignOnWaitListFailure.*;
 import static meetings.dto.SignOutFromWaitListFailure.MEETING_DOESNT_EXIST;
 import static meetings.dto.SignUpForMeetingFailure.GROUP_MEMBER_IS_NOT_SUBSCRIBED;
 import static meetings.dto.SignUpForMeetingFailure.MEETING_DOES_NOT_EXIST;
+import static meetings.dto.SignUpForMeetingFailure.USER_IS_NOT_GROUP_MEMBER;
 
 @AllArgsConstructor
 class MeetingsFacadeImpl implements MeetingsFacade {
@@ -63,6 +65,13 @@ class MeetingsFacadeImpl implements MeetingsFacade {
                 .fold(Option::of, identity());
     }
 
+    private Option<SignUpForMeetingFailure> signUp(Meeting meeting, GroupMemberId groupMemberId) {
+        var meetingGroupId = meeting.getMeetingGroupId();
+        if (!isGroupMemberOrOrganizer(groupMemberId, meetingGroupId))
+            return of(USER_IS_NOT_GROUP_MEMBER);
+        return meeting.signUp(groupMemberId);
+    }
+
     @Override
     public Option<SignOutFailure> signOutFromMeeting(AttendeeId attendeeId, GroupMeetingId groupMeetingId) {
         return meetingRepository
@@ -87,7 +96,7 @@ class MeetingsFacadeImpl implements MeetingsFacade {
     private Option<SignOnWaitListFailure> signOnWaitList(GroupMemberId groupMemberId, Meeting meeting) {
         var meetingGroupId = meeting.getMeetingGroupId();
         if (!isGroupMemberOrOrganizer(groupMemberId, meetingGroupId))
-            return Option.of(USER_IS_NOT_GROUP_MEMBER);
+            return Option.of(SignOnWaitListFailure.USER_IS_NOT_GROUP_MEMBER);
         return meeting.signOnWaitList(groupMemberId);
     }
 
@@ -133,11 +142,11 @@ class MeetingsFacadeImpl implements MeetingsFacade {
                 .forEach(optionalEvent -> optionalEvent.peek(this::notifyAttendee));
     }
 
-    private Option<SignUpForMeetingFailure> signUp(Meeting meeting, GroupMemberId groupMemberId) {
-        var meetingGroupId = meeting.getMeetingGroupId();
-        if (!isGroupMemberOrOrganizer(groupMemberId, meetingGroupId))
-            return of(SignUpForMeetingFailure.USER_IS_NOT_GROUP_MEMBER);
-        return meeting.signUp(groupMemberId);
+    @Override
+    public Option<MeetingDetails> findMeetingDetails(GroupMeetingId groupMeetingId) {
+        return meetingRepository
+                .findById(groupMeetingId)
+                .map(Meeting::toDto);
     }
 
     private boolean isGroupMemberOrOrganizer(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {

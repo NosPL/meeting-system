@@ -4,6 +4,7 @@ import commons.dto.*;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import meetings.dto.*;
+import meetings.query.dto.MeetingDetails;
 
 public interface MeetingsFacade {
 
@@ -26,4 +27,6 @@ public interface MeetingsFacade {
     void newMemberJoinedGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId);
 
     void memberLeftTheMeetingGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId);
+
+    Option<MeetingDetails> findMeetingDetails(GroupMeetingId groupMeetingId);
 }

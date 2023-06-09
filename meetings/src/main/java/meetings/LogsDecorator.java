@@ -6,6 +6,7 @@ import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meetings.dto.*;
+import meetings.query.dto.MeetingDetails;
 
 @AllArgsConstructor
 @Slf4j
@@ -83,5 +84,10 @@ class LogsDecorator implements MeetingsFacade {
     public void memberLeftTheMeetingGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
         meetingsFacade.memberLeftTheMeetingGroup(groupMemberId, meetingGroupId);
         log.info("member left meeting group, member id {}, group id {}", groupMemberId.getId(), meetingGroupId.getId());
+    }
+
+    @Override
+    public Option<MeetingDetails> findMeetingDetails(GroupMeetingId groupMeetingId) {
+        return meetingsFacade.findMeetingDetails(groupMeetingId);
     }
 }
