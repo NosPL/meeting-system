@@ -103,4 +103,8 @@ public class TestSetup {
                 new GroupMeetingName("random-name"),
                 attendeesLimit);
     }
+
+    protected AttendeeId asAttendee(GroupMemberId groupMemberId) {
+        return new AttendeeId(groupMemberId.getId());
+    }
 }
