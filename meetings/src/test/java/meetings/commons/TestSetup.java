@@ -101,4 +101,8 @@ public class TestSetup {
     protected GroupMeetingHostId asHost(GroupOrganizerId groupOrganizerId) {
         return new GroupMeetingHostId(groupOrganizerId.getId());
     }
+
+    protected GroupMeetingId randomGroupMeetingId() {
+        return new GroupMeetingId(UUID.randomUUID().toString());
+    }
 }
