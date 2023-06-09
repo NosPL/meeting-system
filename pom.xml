@@ -12,6 +12,7 @@
         <module>meeting-groups</module>
         <module>commons</module>
         <module>meetings</module>
+        <module>meetings-notifications</module>
     </modules>
 
     <properties>

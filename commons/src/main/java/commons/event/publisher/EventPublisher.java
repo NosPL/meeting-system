@@ -16,6 +16,6 @@ public interface EventPublisher {
 
     void meetingWasHeld(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId);
 
-    void newMeetingWasCancelled(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId);
+    void meetingWasCancelled(MeetingGroupId meetingGroupId, GroupMeetingId groupMeetingId);
 
 }

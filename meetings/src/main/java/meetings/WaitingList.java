@@ -2,7 +2,7 @@ package meetings;
 
 import commons.dto.GroupMemberId;
 import io.vavr.control.Option;
-import meetings.dto.AttendeeId;
+import commons.dto.AttendeeId;
 
 class WaitingList {
 

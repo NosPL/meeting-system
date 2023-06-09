@@ -2,15 +2,20 @@ package meetings;
 
 import commons.active.subscribers.ActiveSubscribersFinder;
 import commons.dto.*;
+import commons.event.publisher.EventPublisher;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import meetings.dto.*;
+import meetings.notifications.MeetingsNotificationsFacade;
 
 import java.util.HashSet;
 
 import static io.vavr.control.Option.of;
 import static java.util.function.Function.identity;
+import static meetings.dto.CancelMeetingFailure.MEETING_DOESNT_EXIST;
+import static meetings.dto.CancelMeetingFailure.USER_IS_NOT_GROUP_ORGANIZER;
+import static meetings.dto.SignOutFailure.MEETING_DOES_NOT_EXIST;
 import static meetings.dto.SignUpForMeetingFailure.*;
 
 @AllArgsConstructor
@@ -19,6 +24,8 @@ class MeetingsFacadeImpl implements MeetingsFacade {
     private final MeetingGroupRepository meetingGroupRepository;
     private final MeetingRepository meetingRepository;
     private final MeetingsScheduler meetingsScheduler;
+    private final MeetingsNotificationsFacade meetingsNotificationsFacade;
+    private final EventPublisher eventPublisher;
 
     @Override
     public Either<ScheduleMeetingFailure, GroupMeetingId> scheduleNewMeeting(GroupOrganizerId groupOrganizerId, MeetingDraft meetingDraft) {
@@ -26,8 +33,22 @@ class MeetingsFacadeImpl implements MeetingsFacade {
     }
 
     @Override
-    public Option<CancelMeetingFailure> cancelMeeting(GroupOrganizerId groupOrganizerId, GroupMeetingId groupMeetingIdId) {
-        return null;
+    public Option<CancelMeetingFailure> cancelMeeting(GroupOrganizerId groupOrganizerId, GroupMeetingId groupMeetingId) {
+        return meetingRepository
+                .findById(groupMeetingId)
+                .toEither(MEETING_DOESNT_EXIST)
+                .map(meeting -> cancelMeeting(groupOrganizerId, meeting))
+                .fold(Option::of, identity());
+    }
+
+    private Option<CancelMeetingFailure> cancelMeeting(GroupOrganizerId groupOrganizerId, Meeting meeting) {
+        if (!meeting.getGroupOrganizerId().equals(groupOrganizerId))
+            return Option.of(USER_IS_NOT_GROUP_ORGANIZER);
+        meetingRepository.removeById(meeting.getGroupMeetingId());
+        var attendees = meeting.getAttendees();
+        eventPublisher.meetingWasCancelled(meeting.getMeetingGroupId(), meeting.getGroupMeetingId());
+        meetingsNotificationsFacade.notifyAttendeesAboutMeetingCancellation(attendees);
+        return Option.none();
     }
 
     @Override
@@ -36,14 +57,23 @@ class MeetingsFacadeImpl implements MeetingsFacade {
             return of(GROUP_MEMBER_IS_NOT_SUBSCRIBED);
         return meetingRepository
                 .findById(groupMeetingId)
-                .toEither(MEETING_DOES_NOT_EXIST)
+                .toEither(SignUpForMeetingFailure.MEETING_DOES_NOT_EXIST)
                 .map(meeting -> signUp(meeting, groupMemberId))
                 .fold(Option::of, identity());
     }
 
     @Override
-    public Option<SignOutFailure> signOutFromMeeting(GroupMemberId groupMemberId, GroupMeetingId groupMeetingId) {
-        return null;
+    public Option<SignOutFailure> signOutFromMeeting(AttendeeId attendeeId, GroupMeetingId groupMeetingId) {
+        return meetingRepository
+                .findById(groupMeetingId)
+                .toEither(MEETING_DOES_NOT_EXIST)
+                .flatMap(meeting -> meeting.signOut(attendeeId))
+                .peek(optionalEvent -> optionalEvent.peek(this::notifyAttendee))
+                .swap().toOption();
+    }
+
+    private void notifyAttendee(Meeting.AttendeeSignedUpFromWaitList event) {
+        meetingsNotificationsFacade.notifyAttendeeAboutBeingSignedUpFromWaitingList(event.getAttendeeId());
     }
 
     @Override
@@ -69,14 +99,10 @@ class MeetingsFacadeImpl implements MeetingsFacade {
                 .findById(meetingGroupId)
                 .peek(meetingGroup -> meetingGroup.remove(groupMemberId));
         meetingRepository
-                .findAll()
+                .findByMeetingGroupId(meetingGroupId)
                 .stream()
                 .map(meeting -> meeting.remove(groupMemberId))
                 .forEach(optionalEvent -> optionalEvent.peek(this::notifyAttendee));
-    }
-
-    private void notifyAttendee(Meeting.AttendeeAddedFromWaitList event) {
-
     }
 
     private Option<SignUpForMeetingFailure> signUp(Meeting meeting, GroupMemberId groupMemberId) {

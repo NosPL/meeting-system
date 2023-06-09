@@ -1,6 +1,7 @@
 package meetings;
 
 import commons.dto.*;
+import io.vavr.control.Either;
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,8 +13,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import static io.vavr.control.Either.left;
 import static io.vavr.control.Option.of;
 import static lombok.AccessLevel.PRIVATE;
+import static meetings.dto.SignOutFailure.USER_WAS_NOT_SIGN_IN;
 import static meetings.dto.SignUpForMeetingFailure.*;
 
 @AllArgsConstructor(access = PRIVATE)
@@ -29,7 +32,14 @@ class Meeting {
     private Set<AttendeeId> attendees;
     private WaitingList waitingList;
 
-    Option<AttendeeAddedFromWaitList> remove(GroupMemberId groupMemberId) {
+    Either<SignOutFailure, Option<AttendeeSignedUpFromWaitList>> signOut(AttendeeId attendeeId) {
+        if (!attendees.contains(attendeeId))
+            return left(USER_WAS_NOT_SIGN_IN);
+        var groupMemberId = new GroupMemberId(attendeeId.getId());
+        return Either.right(remove(groupMemberId));
+    }
+
+    Option<AttendeeSignedUpFromWaitList> remove(GroupMemberId groupMemberId) {
         waitingList.remove(groupMemberId);
         attendees.remove(new AttendeeId(groupMemberId.getId()));
         if (attendeesLimitIsReached())
@@ -37,7 +47,7 @@ class Meeting {
         return waitingList
                 .pop()
                 .peek(attendees::add)
-                .map(AttendeeAddedFromWaitList::new);
+                .map(AttendeeSignedUpFromWaitList::new);
     }
 
     Option<SignUpForMeetingFailure> signUp(GroupMemberId groupMemberId) {
@@ -75,7 +85,7 @@ class Meeting {
     }
 
     @Value
-    static class AttendeeAddedFromWaitList {
+    static class AttendeeSignedUpFromWaitList {
         AttendeeId attendeeId;
     }
 }

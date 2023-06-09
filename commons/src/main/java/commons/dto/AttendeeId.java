@@ -1,4 +1,4 @@
-package meetings.dto;
+package commons.dto;
 
 import lombok.Value;
 

@@ -21,11 +21,11 @@ class LogsDecorator implements MeetingsFacade {
     }
 
     @Override
-    public Option<CancelMeetingFailure> cancelMeeting(GroupOrganizerId groupOrganizerId, GroupMeetingId groupMeetingIdId) {
+    public Option<CancelMeetingFailure> cancelMeeting(GroupOrganizerId groupOrganizerId, GroupMeetingId groupMeetingId) {
         return meetingsFacade
-                .cancelMeeting(groupOrganizerId, groupMeetingIdId)
-                .peek(failure -> log.info("user failed to cancel meeting, user id {}, meeting group id {}, reason: {}", groupOrganizerId.getId(), groupMeetingIdId.getId(), failure))
-                .onEmpty(() -> log.info("meeting"));
+                .cancelMeeting(groupOrganizerId, groupMeetingId)
+                .peek(failure -> log.info("user failed to cancel meeting, user id {}, meeting group id {}, reason: {}", groupOrganizerId.getId(), groupMeetingId.getId(), failure))
+                .onEmpty(() -> log.info("group organizer cancelled meeting, group organizer id {}, meeting id {}", groupOrganizerId.getId(), groupMeetingId.getId()));
     }
 
     @Override
@@ -37,8 +37,11 @@ class LogsDecorator implements MeetingsFacade {
     }
 
     @Override
-    public Option<SignOutFailure> signOutFromMeeting(GroupMemberId groupMemberId, GroupMeetingId groupMeetingId) {
-        return null;
+    public Option<SignOutFailure> signOutFromMeeting(AttendeeId attendeeId, GroupMeetingId groupMeetingId) {
+        return meetingsFacade
+                .signOutFromMeeting(attendeeId, groupMeetingId)
+                .peek(failure -> log.info("attendee failed to sign out from meeting, attendee id {}, meeting id {}, reason: {}", attendeeId.getId(), groupMeetingId.getId(), failure))
+                .onEmpty(() -> log.info("attendee signed out from meeting, attendee id {}, meeting id {}", attendeeId.getId(), groupMeetingId.getId()));
     }
 
     @Override
@@ -50,7 +53,8 @@ class LogsDecorator implements MeetingsFacade {
 
     @Override
     public void meetingGroupWasRemoved(MeetingGroupId meetingGroupId) {
-
+        meetingsFacade.meetingGroupWasRemoved(meetingGroupId);
+        log.info("meeting group was removed, meeting group id {}", meetingGroupId.getId());
     }
 
     @Override
@@ -62,6 +66,6 @@ class LogsDecorator implements MeetingsFacade {
     @Override
     public void memberLeftTheMeetingGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
         meetingsFacade.memberLeftTheMeetingGroup(groupMemberId, meetingGroupId);
+        log.info("member left meeting group, member id {}, group id {}", groupMemberId.getId(), meetingGroupId.getId());
     }
-
 }
