@@ -33,7 +33,7 @@ class MeetingsScheduler {
             return left(USER_IS_NOT_GROUP_ORGANIZER);
         if (!dateIs3DaysInAdvance(meetingDraft.getMeetingDate()))
             return left(MEETING_DATE_IS_NOT_3_DAYS_IN_ADVANCE);
-        if (!isGroupMember(meetingDraft.getMeetingGroupId(), meetingDraft.getGroupMeetingHostId()))
+        if (!isHostGroupMemberOrOrganizer(meetingDraft.getMeetingGroupId(), meetingDraft.getGroupMeetingHostId()))
             return left(PROPOSED_MEETING_HOST_IS_NOT_MEETING_GROUP_MEMBER);
         if (meetingNameIsAlreadyUsed(meetingDraft.getGroupMeetingName()))
             return left(MEETING_NAME_IS_NOT_UNIQUE);
@@ -68,11 +68,11 @@ class MeetingsScheduler {
         return groupMeetingName.getName().isBlank();
     }
 
-    private boolean isGroupMember(MeetingGroupId meetingGroupId, GroupMeetingHostId groupMeetingHostId) {
+    private boolean isHostGroupMemberOrOrganizer(MeetingGroupId meetingGroupId, GroupMeetingHostId groupMeetingHostId) {
         var groupMemberId = new GroupMemberId(groupMeetingHostId.getId());
         return meetingGroupRepository
                 .findById(meetingGroupId)
-                .map(meetingGroup -> meetingGroup.contains(groupMemberId))
+                .map(meetingGroup -> meetingGroup.contains(groupMemberId) || meetingGroup.isOrganizer(groupMemberId))
                 .getOrElse(false);
     }
 

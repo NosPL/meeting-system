@@ -7,10 +7,7 @@ import commons.event.publisher.EventPublisher;
 import io.vavr.control.Option;
 import meetings.MeetingsConfiguration;
 import meetings.MeetingsFacade;
-import meetings.dto.AttendeesLimit;
-import meetings.dto.GroupMeetingHostId;
-import meetings.dto.GroupMeetingName;
-import meetings.dto.MeetingDraft;
+import meetings.dto.*;
 import meetings.notifications.MeetingsNotificationsFacade;
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -79,15 +76,17 @@ public class TestSetup {
 
     protected GroupMeetingId scheduleMeeting(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId) {
         var groupMeetingHostId = new GroupMeetingHostId("group-meeting-host");
-        return scheduleMeeting(groupOrganizerId, meetingGroupId, groupMeetingHostId, Option.none());
+        MeetingDraft meetingDraft =
+                new MeetingDraft(meetingGroupId, calendar.getCurrentDate().plusDays(4), groupMeetingHostId, new GroupMeetingName("some-name"), Option.none(), WaitList.WAIT_LIST_AVAILABLE);
+        return scheduleMeeting(groupOrganizerId, meetingDraft);
     }
 
-    protected GroupMeetingId scheduleMeeting(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId, GroupMeetingHostId groupMeetingHostId, Option<AttendeesLimit> attendeesLimit) {
-        meetingsFacade.newMeetingGroupCreated(groupOrganizerId, meetingGroupId);
-        meetingsFacade.newMemberJoinedGroup(asGroupMember(groupMeetingHostId), meetingGroupId);
+    protected GroupMeetingId scheduleMeeting(GroupOrganizerId groupOrganizerId, MeetingDraft meetingDraft) {
+        var groupMeetingHostId = meetingDraft.getGroupMeetingHostId();
+        meetingsFacade.newMeetingGroupCreated(groupOrganizerId, meetingDraft.getMeetingGroupId());
+        meetingsFacade.newMemberJoinedGroup(asGroupMember(meetingDraft.getGroupMeetingHostId()), meetingDraft.getMeetingGroupId());
         subscriptionRenewed(groupMeetingHostId);
         subscriptionRenewed(groupOrganizerId);
-        var meetingDraft = meetingDraft(groupMeetingHostId, meetingGroupId, attendeesLimit);
         return meetingsFacade.scheduleNewMeeting(groupOrganizerId, meetingDraft).get();
     }
 
@@ -95,16 +94,11 @@ public class TestSetup {
         return new GroupMemberId(groupMeetingHostId.getId());
     }
 
-    protected MeetingDraft meetingDraft(GroupMeetingHostId groupMeetingHostId, MeetingGroupId meetingGroupId, Option<AttendeesLimit> attendeesLimit) {
-        return new MeetingDraft(
-                meetingGroupId,
-                calendar.getCurrentDate().plusDays(4),
-                groupMeetingHostId,
-                new GroupMeetingName("random-name"),
-                attendeesLimit);
-    }
-
     protected AttendeeId asAttendee(GroupMemberId groupMemberId) {
         return new AttendeeId(groupMemberId.getId());
+    }
+
+    protected GroupMeetingHostId asHost(GroupOrganizerId groupOrganizerId) {
+        return new GroupMeetingHostId(groupOrganizerId.getId());
     }
 }

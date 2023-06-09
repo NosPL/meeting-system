@@ -15,6 +15,10 @@ public interface MeetingsFacade {
 
     Option<SignOutFailure> signOutFromMeeting(AttendeeId attendeeId, GroupMeetingId groupMeetingId);
 
+    Option<SignOnWaitListFailure> signOnMeetingWaitList(GroupMemberId groupMemberId, GroupMeetingId groupMeetingId);
+
+    Option<SignOutFromWaitListFailure> signOutFromMeetingWaitList(GroupMemberId groupMemberId, GroupMeetingId groupMeetingId);
+
     void newMeetingGroupCreated(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId);
 
     void meetingGroupWasRemoved(MeetingGroupId meetingGroupId);

@@ -3,10 +3,14 @@ package meetings.signing.up;
 import commons.dto.*;
 import io.vavr.control.Option;
 import meetings.dto.AttendeesLimit;
+import meetings.dto.GroupMeetingName;
+import meetings.dto.MeetingDraft;
+import meetings.dto.WaitList;
 import org.junit.Before;
 import org.junit.Test;
 
 import static meetings.dto.SignUpForMeetingFailure.*;
+import static meetings.dto.WaitList.WAIT_LIST_AVAILABLE;
 import static org.junit.Assert.assertEquals;
 
 public class SignUpForMeetingFailurePaths extends SigningUpSetup {
@@ -22,7 +26,8 @@ public class SignUpForMeetingFailurePaths extends SigningUpSetup {
         subscriptionRenewed(groupMemberId);
         meetingsFacade.newMeetingGroupCreated(groupOrganizerId, meetingGroupId);
         meetingsFacade.newMemberJoinedGroup(groupMemberId, meetingGroupId);
-        groupMeetingId = scheduleMeeting(groupOrganizerId, meetingGroupId, asHost(groupMemberAndHost), attendeesLimit);
+        MeetingDraft meetingDraft = getMeetingDraft();
+        groupMeetingId = scheduleMeeting(groupOrganizerId, meetingDraft);
     }
 
     @Test
@@ -84,5 +89,15 @@ public class SignUpForMeetingFailurePaths extends SigningUpSetup {
 
     private Integer getAttendeesLimitInt() {
         return attendeesLimit.map(AttendeesLimit::getLimit).get();
+    }
+
+    private MeetingDraft getMeetingDraft() {
+        return new MeetingDraft(
+                meetingGroupId,
+                calendar.getCurrentDate().plusDays(3),
+                asHost(groupMemberAndHost),
+                new GroupMeetingName("some-name"),
+                attendeesLimit,
+                WAIT_LIST_AVAILABLE);
     }
 }

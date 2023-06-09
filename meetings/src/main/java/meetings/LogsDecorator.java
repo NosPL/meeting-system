@@ -45,6 +45,22 @@ class LogsDecorator implements MeetingsFacade {
     }
 
     @Override
+    public Option<SignOnWaitListFailure> signOnMeetingWaitList(GroupMemberId groupMemberId, GroupMeetingId groupMeetingId) {
+        return meetingsFacade
+                .signOnMeetingWaitList(groupMemberId, groupMeetingId)
+                .peek(failure -> log.info("user failed to sign up for meeting wait list, group member id {}, meeting group id {}, reason: {}", groupMemberId.getId(), groupMeetingId.getId(), failure))
+                .onEmpty(() -> log.info("group member signed up for meeting wait list, group member id {}, group meeting id {}", groupMemberId.getId(), groupMeetingId.getId()));
+    }
+
+    @Override
+    public Option<SignOutFromWaitListFailure> signOutFromMeetingWaitList(GroupMemberId groupMemberId, GroupMeetingId groupMeetingId) {
+        return meetingsFacade
+                .signOutFromMeetingWaitList(groupMemberId, groupMeetingId)
+                .peek(failure -> log.info("user failed to sign out from meeting wait list, group member id {}, meeting group id {}, reason: {}", groupMemberId.getId(), groupMeetingId.getId(), failure))
+                .onEmpty(() -> log.info("group member signed out from meeting wait list, group member id {}, group meeting id {}", groupMemberId.getId(), groupMeetingId.getId()));
+    }
+
+    @Override
     public void newMeetingGroupCreated(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId) {
         meetingsFacade.newMeetingGroupCreated(groupOrganizerId, meetingGroupId);
         log.info("new meeting group created, group organizer id {}, meeting group id {}", groupOrganizerId.getId(), meetingGroupId.getId());

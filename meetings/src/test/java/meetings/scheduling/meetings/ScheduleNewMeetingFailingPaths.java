@@ -7,6 +7,7 @@ import meetings.commons.TestSetup;
 import meetings.dto.GroupMeetingHostId;
 import meetings.dto.GroupMeetingName;
 import meetings.dto.MeetingDraft;
+import meetings.dto.WaitList;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 
 import static io.vavr.control.Either.left;
 import static meetings.dto.ScheduleMeetingFailure.*;
+import static meetings.dto.WaitList.WAIT_LIST_AVAILABLE;
 import static org.junit.Assert.assertEquals;
 
 public class ScheduleNewMeetingFailingPaths extends TestSetup {
@@ -105,19 +107,19 @@ public class ScheduleNewMeetingFailingPaths extends TestSetup {
     }
 
     private MeetingDraft correctMeetingDraft(MeetingGroupId meetingGroupId) {
-        return new MeetingDraft(meetingGroupId, date3DaysFromNow(), hostThatIsGroupMember, uniqueNotBlankMeetingName(), Option.none());
+        return new MeetingDraft(meetingGroupId, date3DaysFromNow(), hostThatIsGroupMember, uniqueNotBlankMeetingName(), Option.none(), WAIT_LIST_AVAILABLE);
     }
 
     private MeetingDraft correctMeetingDraft(LocalDate meetingDate) {
-        return new MeetingDraft(existingMeetingGroup, meetingDate, hostThatIsGroupMember, uniqueNotBlankMeetingName(), Option.none());
+        return new MeetingDraft(existingMeetingGroup, meetingDate, hostThatIsGroupMember, uniqueNotBlankMeetingName(), Option.none(), WAIT_LIST_AVAILABLE);
     }
 
     private MeetingDraft correctMeetingDraft(GroupMeetingHostId groupMeetingHostId) {
-        return new MeetingDraft(existingMeetingGroup, date3DaysFromNow(), groupMeetingHostId, uniqueNotBlankMeetingName(), Option.none());
+        return new MeetingDraft(existingMeetingGroup, date3DaysFromNow(), groupMeetingHostId, uniqueNotBlankMeetingName(), Option.none(), WAIT_LIST_AVAILABLE);
     }
 
     private MeetingDraft correctMeetingDraft(GroupMeetingName groupMeetingName) {
-        return new MeetingDraft(existingMeetingGroup, date3DaysFromNow(), hostThatIsGroupMember, groupMeetingName, Option.none());
+        return new MeetingDraft(existingMeetingGroup, date3DaysFromNow(), hostThatIsGroupMember, groupMeetingName, Option.none(), WAIT_LIST_AVAILABLE);
     }
 
     private MeetingDraft correctMeetingDraft() {
@@ -126,7 +128,8 @@ public class ScheduleNewMeetingFailingPaths extends TestSetup {
                 date3DaysFromNow(),
                 hostThatIsGroupMember,
                 uniqueNotBlankMeetingName(),
-                Option.none());
+                Option.none(),
+                WAIT_LIST_AVAILABLE);
     }
 
     private LocalDate date3DaysFromNow() {

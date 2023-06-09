@@ -13,10 +13,11 @@ import java.util.HashSet;
 
 import static io.vavr.control.Option.of;
 import static java.util.function.Function.identity;
-import static meetings.dto.CancelMeetingFailure.MEETING_DOESNT_EXIST;
 import static meetings.dto.CancelMeetingFailure.USER_IS_NOT_GROUP_ORGANIZER;
-import static meetings.dto.SignOutFailure.MEETING_DOES_NOT_EXIST;
-import static meetings.dto.SignUpForMeetingFailure.*;
+import static meetings.dto.SignOnWaitListFailure.*;
+import static meetings.dto.SignOutFromWaitListFailure.MEETING_DOESNT_EXIST;
+import static meetings.dto.SignUpForMeetingFailure.GROUP_MEMBER_IS_NOT_SUBSCRIBED;
+import static meetings.dto.SignUpForMeetingFailure.MEETING_DOES_NOT_EXIST;
 
 @AllArgsConstructor
 class MeetingsFacadeImpl implements MeetingsFacade {
@@ -36,7 +37,7 @@ class MeetingsFacadeImpl implements MeetingsFacade {
     public Option<CancelMeetingFailure> cancelMeeting(GroupOrganizerId groupOrganizerId, GroupMeetingId groupMeetingId) {
         return meetingRepository
                 .findById(groupMeetingId)
-                .toEither(MEETING_DOESNT_EXIST)
+                .toEither(CancelMeetingFailure.MEETING_DOESNT_EXIST)
                 .map(meeting -> cancelMeeting(groupOrganizerId, meeting))
                 .fold(Option::of, identity());
     }
@@ -57,7 +58,7 @@ class MeetingsFacadeImpl implements MeetingsFacade {
             return of(GROUP_MEMBER_IS_NOT_SUBSCRIBED);
         return meetingRepository
                 .findById(groupMeetingId)
-                .toEither(SignUpForMeetingFailure.MEETING_DOES_NOT_EXIST)
+                .toEither(MEETING_DOES_NOT_EXIST)
                 .map(meeting -> signUp(meeting, groupMemberId))
                 .fold(Option::of, identity());
     }
@@ -66,9 +67,36 @@ class MeetingsFacadeImpl implements MeetingsFacade {
     public Option<SignOutFailure> signOutFromMeeting(AttendeeId attendeeId, GroupMeetingId groupMeetingId) {
         return meetingRepository
                 .findById(groupMeetingId)
-                .toEither(MEETING_DOES_NOT_EXIST)
+                .toEither(SignOutFailure.MEETING_DOES_NOT_EXIST)
                 .flatMap(meeting -> meeting.signOut(attendeeId))
                 .peek(optionalEvent -> optionalEvent.peek(this::notifyAttendee))
+                .swap().toOption();
+    }
+
+    @Override
+    public Option<SignOnWaitListFailure> signOnMeetingWaitList(GroupMemberId groupMemberId, GroupMeetingId groupMeetingId) {
+        if(!isSubscribed(groupMemberId))
+            return Option.of(USER_IS_NOT_SUBSCRIBED);
+        return meetingRepository
+                .findById(groupMeetingId)
+                .toEither(GROUP_MEETING_DOESNT_EXIST)
+                .map(meeting -> signOnWaitList(groupMemberId, meeting))
+                .fold(Option::of, identity());
+    }
+
+    private Option<SignOnWaitListFailure> signOnWaitList(GroupMemberId groupMemberId, Meeting meeting) {
+        var meetingGroupId = meeting.getMeetingGroupId();
+        if (!isGroupMemberOrOrganizer(groupMemberId, meetingGroupId))
+            return Option.of(USER_IS_NOT_GROUP_MEMBER);
+        return meeting.signOnWaitList(groupMemberId);
+    }
+
+    @Override
+    public Option<SignOutFromWaitListFailure> signOutFromMeetingWaitList(GroupMemberId groupMemberId, GroupMeetingId groupMeetingId) {
+        return meetingRepository
+                .findById(groupMeetingId)
+                .toEither(MEETING_DOESNT_EXIST)
+                .peek(meeting -> meeting.signOutFromWaitList(groupMemberId))
                 .swap().toOption();
     }
 
@@ -107,15 +135,15 @@ class MeetingsFacadeImpl implements MeetingsFacade {
 
     private Option<SignUpForMeetingFailure> signUp(Meeting meeting, GroupMemberId groupMemberId) {
         var meetingGroupId = meeting.getMeetingGroupId();
-        if (!isGroupMember(groupMemberId, meetingGroupId))
-            return of(USER_IS_NOT_GROUP_MEMBER);
+        if (!isGroupMemberOrOrganizer(groupMemberId, meetingGroupId))
+            return of(SignUpForMeetingFailure.USER_IS_NOT_GROUP_MEMBER);
         return meeting.signUp(groupMemberId);
     }
 
-    private boolean isGroupMember(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
+    private boolean isGroupMemberOrOrganizer(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
         return meetingGroupRepository
                 .findById(meetingGroupId)
-                .map(meetingGroup -> meetingGroup.contains(groupMemberId))
+                .map(meetingGroup -> meetingGroup.contains(groupMemberId)|| meetingGroup.isOrganizer(groupMemberId))
                 .getOrElse(false);
     }
 

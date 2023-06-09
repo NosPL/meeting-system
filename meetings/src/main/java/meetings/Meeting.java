@@ -10,14 +10,18 @@ import meetings.dto.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.UUID;
 
 import static io.vavr.control.Either.left;
 import static io.vavr.control.Option.of;
 import static lombok.AccessLevel.PRIVATE;
+import static meetings.dto.SignOnWaitListFailure.ATTENDEES_LIMIT_IS_NOT_REACHED;
+import static meetings.dto.SignOnWaitListFailure.WAIT_LIST_IS_NOT_AVAILABLE;
 import static meetings.dto.SignOutFailure.USER_WAS_NOT_SIGN_IN;
 import static meetings.dto.SignUpForMeetingFailure.*;
+import static meetings.dto.WaitList.WAIT_LIST_NOT_AVAILABLE;
 
 @AllArgsConstructor(access = PRIVATE)
 @Getter
@@ -30,7 +34,7 @@ class Meeting {
     private GroupMeetingName groupMeetingName;
     private Option<Integer> attendeesLimit;
     private Set<AttendeeId> attendees;
-    private WaitingList waitingList;
+    private WaitList waitList;
 
     Either<SignOutFailure, Option<AttendeeSignedUpFromWaitList>> signOut(AttendeeId attendeeId) {
         if (!attendees.contains(attendeeId))
@@ -40,11 +44,11 @@ class Meeting {
     }
 
     Option<AttendeeSignedUpFromWaitList> remove(GroupMemberId groupMemberId) {
-        waitingList.remove(groupMemberId);
+        waitList.remove(groupMemberId);
         attendees.remove(new AttendeeId(groupMemberId.getId()));
         if (attendeesLimitIsReached())
             return Option.none();
-        return waitingList
+        return waitList
                 .pop()
                 .peek(attendees::add)
                 .map(AttendeeSignedUpFromWaitList::new);
@@ -58,6 +62,16 @@ class Meeting {
         var attendeeId = new AttendeeId(groupMemberId.getId());
         attendees.add(attendeeId);
         return Option.none();
+    }
+
+    Option<SignOnWaitListFailure> signOnWaitList(GroupMemberId groupMemberId) {
+        if (!attendeesLimitIsReached())
+            return Option.of(ATTENDEES_LIMIT_IS_NOT_REACHED);
+        return waitList.signOn(groupMemberId);
+    }
+
+    void signOutFromWaitList(GroupMemberId groupMemberId) {
+        waitList.remove(groupMemberId);
     }
 
     private boolean attendeesLimitIsReached() {
@@ -81,11 +95,38 @@ class Meeting {
                 meetingDraft.getGroupMeetingName(),
                 meetingDraft.getAttendeesLimit().map(AttendeesLimit::getLimit),
                 new HashSet<>(),
-                new WaitingList());
+                WaitList.crateFrom(meetingDraft.getWaitList()));
     }
 
     @Value
     static class AttendeeSignedUpFromWaitList {
         AttendeeId attendeeId;
+    }
+
+    @AllArgsConstructor(access = PRIVATE)
+    private static class WaitList {
+        private final meetings.dto.WaitList waitList;
+        private final LinkedList<GroupMemberId> groupMembers;
+
+        Option<AttendeeId> pop() {
+            return of(groupMembers.pollFirst())
+                    .map(GroupMemberId::getId)
+                    .map(AttendeeId::new);
+        }
+
+        void remove(GroupMemberId groupMemberId) {
+            groupMembers.remove(groupMemberId);
+        }
+
+        Option<SignOnWaitListFailure> signOn(GroupMemberId groupMemberId) {
+            if (waitList == WAIT_LIST_NOT_AVAILABLE)
+                return of(WAIT_LIST_IS_NOT_AVAILABLE);
+            groupMembers.addLast(groupMemberId);
+            return Option.none();
+        }
+
+        static WaitList crateFrom(meetings.dto.WaitList waitList) {
+            return new WaitList(waitList, new LinkedList<>());
+        }
     }
 }

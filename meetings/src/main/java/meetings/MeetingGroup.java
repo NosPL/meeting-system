@@ -27,4 +27,8 @@ class MeetingGroup {
     public void remove(GroupMemberId groupMemberId) {
         groupMemberIds.remove(groupMemberId);
     }
+
+    public boolean isOrganizer(GroupMemberId groupMemberId) {
+        return groupOrganizerId.equals(new GroupOrganizerId(groupMemberId.getId()));
+    }
 }

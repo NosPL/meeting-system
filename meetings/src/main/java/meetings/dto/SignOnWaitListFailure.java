@@ -1,0 +1,9 @@
+package meetings.dto;
+
+public enum SignOnWaitListFailure {
+    GROUP_MEETING_DOESNT_EXIST,
+    USER_IS_NOT_GROUP_MEMBER,
+    WAIT_LIST_IS_NOT_AVAILABLE,
+    ATTENDEES_LIMIT_IS_NOT_REACHED,
+    USER_IS_NOT_SUBSCRIBED
+}
