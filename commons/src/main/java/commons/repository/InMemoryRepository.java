@@ -1,6 +1,7 @@
 package commons.repository;
 
 import io.vavr.control.Option;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
@@ -8,9 +9,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class InMemoryRepository<E, ID> implements Repository<E, ID> {
-    protected final List<E> entities;
+    protected List<E> entities;
     protected final Function<E, ID> idGetter;
 
     public ID save(E entity) {

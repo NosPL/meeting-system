@@ -3,6 +3,7 @@ package meeting.comments;
 import commons.active.subscribers.InMemoryActiveSubscribers;
 import commons.dto.GroupMeetingId;
 import commons.dto.GroupMemberId;
+import commons.dto.GroupOrganizerId;
 import commons.dto.UserId;
 import meeting.comments.dto.CommentAuthorId;
 import meeting.comments.dto.CommentContent;
@@ -17,15 +18,15 @@ public class TestSetup {
     @Before
     public void testSetupInit() {
         activeSubscribers = new InMemoryActiveSubscribers();
-        meetingCommentsFacade = new MeetingCommentsConfiguration().meetingCommentsFacade(activeSubscribers);
-    }
-
-    protected void subscriptionRenewed(GroupMemberId groupMemberId) {
-        activeSubscribers.add(new UserId(groupMemberId.getId()));
+        meetingCommentsFacade = new MeetingCommentsConfiguration().inMemoryMeetingCommentsFacade(activeSubscribers);
     }
 
     protected void subscriptionRenewed(CommentAuthorId commentAuthorId) {
         activeSubscribers.add(new UserId(commentAuthorId.getId()));
+    }
+
+    protected void subscriptionRenewed(GroupOrganizerId groupOrganizerId) {
+        activeSubscribers.add(new UserId(groupOrganizerId.getId()));
     }
 
     protected void subscriptionExpired(CommentAuthorId commentAuthorId) {
@@ -46,5 +47,9 @@ public class TestSetup {
 
     protected GroupMemberId asGroupMember(CommentAuthorId commentAuthorId) {
         return new GroupMemberId(commentAuthorId.getId());
+    }
+
+    protected CommentAuthorId asCommentAuthor(GroupOrganizerId groupOrganizerId) {
+        return new CommentAuthorId(groupOrganizerId.getId());
     }
 }

@@ -18,15 +18,14 @@ public class LeavingCommentFailurePathsTest extends TestSetup {
     private final CommentAuthorId commentAuthorId = new CommentAuthorId("comment-author-id");
     private final MeetingGroupId meetingGroupId = new MeetingGroupId("meeting-group-id");
     private final GroupMeetingId groupMeetingId = new GroupMeetingId("group-meeting-id");
-    private final GroupMemberId groupMemberId = new GroupMemberId("group-member-id");
     private final GroupOrganizerId groupOrganizerId = new GroupOrganizerId("group-organizer-id");
 
     @Before
     public void leavingCommentFailureInit() {
         meetingCommentsFacade.newMeetingGroupCreated(groupOrganizerId, meetingGroupId);
-        meetingCommentsFacade.newMemberJoinedGroup(groupMemberId, meetingGroupId);
+        meetingCommentsFacade.newMemberJoinedGroup(asGroupMember(commentAuthorId), meetingGroupId);
         meetingCommentsFacade.newMeetingScheduled(groupMeetingId, meetingGroupId);
-        subscriptionRenewed(groupMemberId);
+        subscriptionRenewed(commentAuthorId);
     }
 
     @Test
@@ -63,5 +62,15 @@ public class LeavingCommentFailurePathsTest extends TestSetup {
         var result = meetingCommentsFacade.leaveComment(commentAuthorId, groupMeetingId, notBlankComment());
 //        then he fails
         assertEquals(Either.left(USER_IS_NOT_SUBSCRIBED), result);
+    }
+
+    @Test
+    public void userShouldFailToLeaveTheCommentForMeetingAfterMeetingGroupRemoval() {
+//        given that meeting group was removed
+        meetingCommentsFacade.meetingGroupWasRemoved(meetingGroupId);
+//        when user tries to leave the comment
+        var result = meetingCommentsFacade.leaveComment(commentAuthorId, groupMeetingId, notBlankComment());
+//        then he fails
+        assertEquals(Either.left(MEETING_DOESNT_EXIST), result);
     }
 }

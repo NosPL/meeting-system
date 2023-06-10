@@ -23,7 +23,7 @@ class LogsDecorator implements MeetingCommentsFacade {
     public Either<LeaveCommentFailure, CommentDetails> leaveComment(CommentAuthorId commentAuthorId, GroupMeetingId groupMeetingId, CommentContent commentContent) {
         return meetingCommentsFacade
                 .leaveComment(commentAuthorId, groupMeetingId, commentContent)
-                .peek(commentDetails -> log.info("comment author successfully left the comment for meeting, comment author id {}, group meeting id {}, comment id {}", commentAuthorId.getId(), groupMeetingId.getId(), commentDetails.getCommentId()))
+                .peek(commentDetails -> log.info("comment author successfully left the comment for meeting, comment author id {}, group meeting id {}, comment id {}", commentAuthorId.getId(), groupMeetingId.getId(), commentDetails.getCommentId().getId()))
                 .peekLeft(failure -> log.info("comment author failed to leave the comment for meeting, comment author id {}, group meeting id {}, reason: {}", commentAuthorId.getId(), groupMeetingId.getId(), failure));
     }
 
@@ -85,32 +85,32 @@ class LogsDecorator implements MeetingCommentsFacade {
 
     @Override
     public void newMeetingGroupCreated(GroupOrganizerId groupOrganizerId, MeetingGroupId meetingGroupId) {
-        meetingCommentsFacade.newMeetingGroupCreated(groupOrganizerId, meetingGroupId);
         log.info("new meeting group was created, group organizer id {}, meeting group id {}", groupOrganizerId.getId(), meetingGroupId.getId());
+        meetingCommentsFacade.newMeetingGroupCreated(groupOrganizerId, meetingGroupId);
     }
 
     @Override
     public void meetingGroupWasRemoved(MeetingGroupId meetingGroupId) {
-        meetingCommentsFacade.meetingGroupWasRemoved(meetingGroupId);
         log.info("meeting group was removed, meeting group id {}", meetingGroupId.getId());
+        meetingCommentsFacade.meetingGroupWasRemoved(meetingGroupId);
     }
 
     @Override
     public void newMemberJoinedGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
-        meetingCommentsFacade.newMemberJoinedGroup(groupMemberId, meetingGroupId);
         log.info("new member joined group, group member id {}, meeting group id {}", groupMemberId.getId(), meetingGroupId.getId());
+        meetingCommentsFacade.newMemberJoinedGroup(groupMemberId, meetingGroupId);
     }
 
     @Override
     public void memberLeftTheMeetingGroup(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
-        meetingCommentsFacade.memberLeftTheMeetingGroup(groupMemberId, meetingGroupId);
         log.info("member left the group, group member id {}, meeting group id {}", groupMemberId.getId(), meetingGroupId.getId());
+        meetingCommentsFacade.memberLeftTheMeetingGroup(groupMemberId, meetingGroupId);
     }
 
     @Override
     public void newMeetingScheduled(GroupMeetingId groupMeetingId, MeetingGroupId meetingGroupId) {
-        meetingCommentsFacade.newMeetingScheduled(groupMeetingId, meetingGroupId);
         log.info("new meeting scheduled, group meeting id {}, meeting group id {}", groupMeetingId.getId(), meetingGroupId.getId());
+        meetingCommentsFacade.newMeetingScheduled(groupMeetingId, meetingGroupId);
     }
 
     @Override

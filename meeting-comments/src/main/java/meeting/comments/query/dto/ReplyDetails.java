@@ -10,7 +10,6 @@ import meeting.comments.dto.ReplyId;
 @Value
 public class ReplyDetails {
     ReplyId replyId;
-    GroupMeetingId groupMeetingId;
     ReplyAuthorId replyAuthorId;
     CommentId commentId;
     ReplyContent replyContent;

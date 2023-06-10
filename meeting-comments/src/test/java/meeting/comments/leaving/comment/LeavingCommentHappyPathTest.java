@@ -1,14 +1,11 @@
 package meeting.comments.leaving.comment;
 
-import commons.dto.*;
-import io.vavr.control.Option;
+import commons.dto.GroupMeetingId;
+import commons.dto.GroupOrganizerId;
+import commons.dto.MeetingGroupId;
 import meeting.comments.TestSetup;
 import meeting.comments.dto.CommentAuthorId;
-import org.junit.Before;
 import org.junit.Test;
-
-import static meeting.comments.dto.LeaveCommentFailure.*;
-import static org.junit.Assert.assertEquals;
 
 public class LeavingCommentHappyPathTest extends TestSetup {
     private final MeetingGroupId meetingGroupId = new MeetingGroupId("meeting-group");
@@ -26,8 +23,14 @@ public class LeavingCommentHappyPathTest extends TestSetup {
         meetingCommentsFacade.newMemberJoinedGroup(asGroupMember(commentAuthorId), meetingGroupId);
 //        and comment author is subscribed
         subscriptionRenewed(commentAuthorId);
-//        when user tries to leave the comment
+//        when user tries to leave a comment
         var result = meetingCommentsFacade.leaveComment(commentAuthorId, groupMeetingId, notBlankComment());
+//        then he succeeds
+        assert result.isRight();
+//        when group organizer tries to leave a comment
+        subscriptionRenewed(groupOrganizerId);
+        result = meetingCommentsFacade
+                .leaveComment(asCommentAuthor(groupOrganizerId), groupMeetingId, notBlankComment());
 //        then he succeeds
         assert result.isRight();
     }

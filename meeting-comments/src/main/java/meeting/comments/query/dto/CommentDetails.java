@@ -9,8 +9,8 @@ import meeting.comments.dto.CommentId;
 @Value
 public class CommentDetails {
     CommentId commentId;
-    GroupMeetingId groupMeetingId;
     CommentAuthorId commentAuthorId;
+    GroupMeetingId groupMeetingId;
     CommentContent commentContent;
     RepliesCount repliesCount;
     LikesCount likesCount;
