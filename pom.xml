@@ -13,6 +13,7 @@
         <module>commons</module>
         <module>meetings</module>
         <module>meetings-notifications</module>
+        <module>meeting-comments</module>
     </modules>
 
     <properties>
