@@ -1,12 +1,12 @@
 package meetings;
 
 import commons.active.subscribers.ActiveSubscribersFinder;
-import commons.calendar.Calendar;
 import commons.dto.*;
 import commons.event.publisher.EventPublisher;
 import io.vavr.control.Either;
 import lombok.AllArgsConstructor;
 import meetings.dto.*;
+import meetings.ports.Calendar;
 
 import java.time.LocalDate;
 

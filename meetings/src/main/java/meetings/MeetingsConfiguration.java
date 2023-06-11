@@ -1,9 +1,9 @@
 package meetings;
 
 import commons.active.subscribers.ActiveSubscribersFinder;
-import commons.calendar.Calendar;
 import commons.event.publisher.EventPublisher;
 import meetings.notifications.MeetingsNotificationsFacade;
+import meetings.ports.Calendar;
 
 import java.util.LinkedList;
 

@@ -1,7 +1,7 @@
 package meetings.commons;
 
 import commons.active.subscribers.InMemoryActiveSubscribers;
-import commons.calendar.Calendar;
+import meetings.ports.Calendar;
 import commons.dto.*;
 import commons.event.publisher.EventPublisher;
 import io.vavr.control.Option;
@@ -10,7 +10,6 @@ import meetings.MeetingsFacade;
 import meetings.dto.*;
 import meetings.notifications.MeetingsNotificationsFacade;
 import org.junit.Before;
-import org.mockito.Mockito;
 
 import java.time.LocalDate;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package commons.calendar;
+package meetings.ports;
 
 import java.time.LocalDate;
 

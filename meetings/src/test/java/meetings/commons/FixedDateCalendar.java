@@ -1,6 +1,6 @@
 package meetings.commons;
 
-import commons.calendar.Calendar;
+import meetings.ports.Calendar;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
