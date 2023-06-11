@@ -32,12 +32,10 @@ interface GroupMembershipRepository extends Repository<GroupMembership, GroupMem
 
         @Override
         public void removeByGroupMemberIdAndMeetingGroupId(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
-            entities
+            entities = entities
                     .stream()
-                    .filter(groupMembership -> groupMembership.getGroupMemberId().equals(groupMemberId))
-                    .filter(groupMembership -> groupMembership.getMeetingGroupId().equals(meetingGroupId))
-                    .findFirst()
-                    .ifPresent(groupMembership -> removeById(groupMembership.getGroupMembershipId()));
+                    .filter(groupMembership -> !groupMembership.equalsBoth(groupMemberId, meetingGroupId))
+                    .toList();
         }
 
         @Override

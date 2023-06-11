@@ -14,6 +14,11 @@ import java.util.List;
 
 import static io.vavr.control.Either.left;
 import static io.vavr.control.Either.right;
+import static io.vavr.control.Option.of;
+import static java.util.function.Function.identity;
+import static meeting.comments.dto.DeleteCommentFailure.COMMENT_DOESNT_EXIST;
+import static meeting.comments.dto.DeleteCommentFailure.USER_IS_NOT_COMMENT_AUTHOR;
+import static meeting.comments.dto.DeleteCommentFailure.USER_IS_NOT_GROUP_MEMBER;
 import static meeting.comments.dto.LeaveCommentFailure.*;
 
 @AllArgsConstructor
@@ -33,7 +38,7 @@ class MeetingCommentsFacadeImpl implements MeetingCommentsFacade {
         if (!meetingExists(groupMeetingId))
             return left(MEETING_DOESNT_EXIST);
         if (!commentAuthorIsGroupMember(commentAuthorId, groupMeetingId) && !commentAuthorIsGroupOrganizer(commentAuthorId, groupMeetingId))
-            return left(USER_IS_NOT_GROUP_MEMBER);
+            return left(LeaveCommentFailure.USER_IS_NOT_GROUP_MEMBER);
         if (commentContent.getContent().isBlank())
             return left(COMMENT_CONTENT_CANNOT_BE_BLANK);
         var comment = Comment.create(commentAuthorId, groupMeetingId, commentContent);
@@ -75,7 +80,20 @@ class MeetingCommentsFacadeImpl implements MeetingCommentsFacade {
 
     @Override
     public Option<DeleteCommentFailure> deleteComment(CommentAuthorId commentAuthorId, CommentId commentId) {
-        return null;
+        return commentRepository
+                .findById(commentId)
+                .toEither(COMMENT_DOESNT_EXIST)
+                .map(comment -> remove(comment, commentAuthorId))
+                .fold(Option::of, identity());
+    }
+
+    private Option<DeleteCommentFailure> remove(Comment comment, CommentAuthorId commentAuthorId) {
+        if (!comment.getCommentAuthorId().equals(commentAuthorId))
+            return of(USER_IS_NOT_COMMENT_AUTHOR);
+        if (!commentAuthorIsGroupMember(commentAuthorId, comment.getGroupMeetingId()))
+            return of(USER_IS_NOT_GROUP_MEMBER);
+        commentRepository.removeById(comment.getCommentId());
+        return Option.none();
     }
 
     @Override
@@ -140,10 +158,11 @@ class MeetingCommentsFacadeImpl implements MeetingCommentsFacade {
     public void newMeetingScheduled(GroupMeetingId groupMeetingId, MeetingGroupId meetingGroupId) {
         groupRepository
                 .findById(meetingGroupId)
-                .onEmpty(() -> log.error("failed to find meeting group with id {}, Meeting entity will be created without organizer id, so organizer will not be able to commit any actions in this module", meetingGroupId.getId()))
                 .map(Group::getGroupOrganizerId)
                 .map(groupOrganizerId -> new Meeting(groupMeetingId, meetingGroupId, groupOrganizerId))
-                .map(meetingRepository::save);
+                .map(meetingRepository::save)
+                .onEmpty(() -> log.error("failed to find meeting group with id {}, Meeting entity will be created without group organizer id, so organizer will not be able to commit any actions in this module", meetingGroupId.getId()))
+                .onEmpty(() -> meetingRepository.save(new Meeting(groupMeetingId, meetingGroupId, null)));
     }
 
     @Override

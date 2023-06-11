@@ -23,7 +23,7 @@ class LogsDecorator implements MeetingCommentsFacade {
     public Either<LeaveCommentFailure, CommentDetails> leaveComment(CommentAuthorId commentAuthorId, GroupMeetingId groupMeetingId, CommentContent commentContent) {
         return meetingCommentsFacade
                 .leaveComment(commentAuthorId, groupMeetingId, commentContent)
-                .peek(commentDetails -> log.info("comment author successfully left the comment for meeting, comment author id {}, group meeting id {}, comment id {}", commentAuthorId.getId(), groupMeetingId.getId(), commentDetails.getCommentId().getId()))
+                .peek(commentDetails -> log.info("comment author left the comment for meeting, comment author id {}, group meeting id {}, comment id {}", commentAuthorId.getId(), groupMeetingId.getId(), commentDetails.getCommentId().getId()))
                 .peekLeft(failure -> log.info("comment author failed to leave the comment for meeting, comment author id {}, group meeting id {}, reason: {}", commentAuthorId.getId(), groupMeetingId.getId(), failure));
     }
 
@@ -32,7 +32,7 @@ class LogsDecorator implements MeetingCommentsFacade {
         return meetingCommentsFacade
                 .deleteComment(commentAuthorId, commentId)
                 .peek(failure -> log.info("comment author failed to delete the comment, comment author id {}, reason: {}", commentAuthorId.getId(), failure))
-                .onEmpty(() -> log.info("comment author successfully deleted the comment, comment author id {}, comment id {}", commentAuthorId.getId(), commentId.getId()));
+                .onEmpty(() -> log.info("comment author deleted the comment, comment author id {}, comment id {}", commentAuthorId.getId(), commentId.getId()));
     }
 
     @Override

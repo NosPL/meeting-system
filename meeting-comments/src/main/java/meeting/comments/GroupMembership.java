@@ -15,8 +15,13 @@ class GroupMembership {
     private GroupMemberId groupMemberId;
     private MeetingGroupId meetingGroupId;
 
-    public static GroupMembership create(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
+    static GroupMembership create(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
         var groupMembershipId = new GroupMembershipId(UUID.randomUUID().toString());
         return new GroupMembership(groupMembershipId, groupMemberId, meetingGroupId);
+    }
+
+    boolean equalsBoth(GroupMemberId groupMemberId, MeetingGroupId meetingGroupId) {
+        return this.groupMemberId.equals(groupMemberId) &&
+                this.meetingGroupId.equals(meetingGroupId);
     }
 }

@@ -7,6 +7,7 @@ import commons.dto.GroupOrganizerId;
 import commons.dto.UserId;
 import meeting.comments.dto.CommentAuthorId;
 import meeting.comments.dto.CommentContent;
+import meeting.comments.dto.CommentId;
 import org.junit.Before;
 
 import java.util.UUID;
@@ -51,5 +52,21 @@ public class TestSetup {
 
     protected CommentAuthorId asCommentAuthor(GroupOrganizerId groupOrganizerId) {
         return new CommentAuthorId(groupOrganizerId.getId());
+    }
+
+    protected GroupMemberId randomGroupMemberId() {
+        return new GroupMemberId(UUID.randomUUID().toString());
+    }
+
+    protected CommentId randomCommentId() {
+        return new CommentId(UUID.randomUUID().toString());
+    }
+
+    protected void subscriptionRenewed(GroupMemberId groupMemberId) {
+        activeSubscribers.add(new UserId(groupMemberId.getId()));
+    }
+
+    protected CommentAuthorId asCommentAuthor(GroupMemberId groupMemberId) {
+        return new CommentAuthorId(groupMemberId.getId());
     }
 }

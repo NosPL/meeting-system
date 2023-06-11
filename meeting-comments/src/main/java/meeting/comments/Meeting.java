@@ -8,13 +8,15 @@ import lombok.Getter;
 import meeting.comments.dto.CommentAuthorId;
 
 @AllArgsConstructor
-@Getter
 class Meeting {
+    @Getter
     private GroupMeetingId groupMeetingId;
+    @Getter
     private MeetingGroupId meetingGroupId;
     private GroupOrganizerId groupOrganizerId;
 
     boolean isGroupOrganizer(CommentAuthorId commentAuthorId) {
-        return groupOrganizerId.equals(new GroupOrganizerId(commentAuthorId.getId()));
+        GroupOrganizerId commentAuthor = new GroupOrganizerId(commentAuthorId.getId());
+        return groupOrganizerId.equals(commentAuthor);
     }
 }
